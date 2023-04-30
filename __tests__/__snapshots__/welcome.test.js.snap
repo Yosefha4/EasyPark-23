@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WelcomeScreen should render correctly with mocked AuthContext 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+      "padding": 32,
+    }
+  }
+>
+  <Text
+    style={
+      {
+        "fontSize": 20,
+        "fontWeight": "bold",
+        "marginBottom": 8,
+      }
+    }
+    testID="welcTestText"
+  >
+    ברוכים הבאים !
+  </Text>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flex": 1,
+        "height": "100%",
+        "justifyContent": "center",
+        "width": "100%",
+      }
+    }
+  >
+    <Image
+      source={
+        {
+          "testUri": "../../../assets/imageWithoutBg.png",
+        }
+      }
+      style={
+        {
+          "height": "80%",
+          "position": "absolute",
+          "width": "100%",
+          "zIndex": -1,
+        }
+      }
+      testID="welcomeImage"
+    />
+  </View>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "backgroundColor": "#0059af",
+          "borderRadius": 6,
+          "elevation": 2,
+          "paddingHorizontal": 12,
+          "paddingVertical": 6,
+          "shadowColor": "black",
+          "shadowOffset": {
+            "height": 1,
+            "width": 1,
+          },
+          "shadowOpacity": 0.25,
+          "shadowRadius": 4,
+        },
+        false,
+      ]
+    }
+  >
+    <View>
+      <Text
+        style={
+          {
+            "color": "white",
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "textAlign": "center",
+          }
+        }
+      >
+        המשך         
+      </Text>
+    </View>
+  </View>
+</View>
+`;

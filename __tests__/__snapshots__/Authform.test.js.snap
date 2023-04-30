@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Input Validation Valid Input render without errors 1`] = `
+<View>
+  <View
+    style={
+      {
+        "marginVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "white",
+            "marginBottom": 4,
+            "textAlign": "right",
+          },
+          false,
+        ]
+      }
+    >
+      Email Address
+    </Text>
+    <TextInput
+      autoCapitalize="none"
+      keyboardType="email-address"
+      onChangeText={[Function]}
+      style={
+        [
+          {
+            "backgroundColor": "#f0f0f0",
+            "borderRadius": 4,
+            "fontSize": 16,
+            "paddingHorizontal": 6,
+            "paddingVertical": 8,
+          },
+          false,
+        ]
+      }
+      value="test@example.com"
+    />
+  </View>
+  <View
+    style={
+      {
+        "marginVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "white",
+            "marginBottom": 4,
+            "textAlign": "right",
+          },
+          false,
+        ]
+      }
+    >
+      Password
+    </Text>
+    <TextInput
+      autoCapitalize="none"
+      onChangeText={[Function]}
+      secureTextEntry={true}
+      style={
+        [
+          {
+            "backgroundColor": "#f0f0f0",
+            "borderRadius": 4,
+            "fontSize": 16,
+            "paddingHorizontal": 6,
+            "paddingVertical": 8,
+          },
+          false,
+        ]
+      }
+      value="password123"
+    />
+  </View>
+</View>
+`;
