@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_KEY = 'AIzaSyB1gr5GOBC-KKAHUqpZlPhVYNprk3BlOr4';
+const API_KEY = '*****';
 
 
 
