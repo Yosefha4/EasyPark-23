@@ -49,4 +49,3 @@ export function login(email, password) {
 
 // import axios from "axios";
 
-// const API_KEY = "AIzaSyB1gr5GOBC-KKAHUqpZlPhVYNprk3BlOr4";
