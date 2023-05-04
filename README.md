@@ -10,3 +10,5 @@ It is built using the Expo framework, which provides a fast and easy way to deve
 * Book parking spots in advance
 * View your rental history and upcoming bookings
 * Manage your parking spot listings and availability
+
+Test : Expo-Jest & React-Test-Renderer
