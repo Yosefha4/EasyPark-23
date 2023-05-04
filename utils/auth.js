@@ -18,7 +18,7 @@ async function authenticate(mode, email, password) {
   // console.log(response.data);
   const token = response.data.idToken;
 
-  console.log("The Token is : " + token)
+  // console.log("The Token is : " + token)
 
   return token;
 }
@@ -49,4 +49,3 @@ export function login(email, password) {
 
 // import axios from "axios";
 
-// const API_KEY = "AIzaSyB1gr5GOBC-KKAHUqpZlPhVYNprk3BlOr4";

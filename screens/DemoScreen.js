@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import ParkingList from "../components/parkings/ParkingList";
 
@@ -6,11 +6,16 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { FlatList } from "react-native";
 import ParkingItem from "../components/parkings/ParkingItem";
+import Button from "../components/ui/Button";
 // import { useIsFocused } from "@react-navigation/native";
 
 const DemoScreen = ({ route }) => {
   const [loadParkings, setLoadParkings] = useState([]);
   const [isLoad, setIsLoad] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredParkings, setFilteredParkings] = useState([]);
+  const [isFilter, setIsFilter] = useState(false);
   // const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -24,70 +29,39 @@ const DemoScreen = ({ route }) => {
     });
   }, []);
 
-  // console.log(loadParkings);
-
-  
-  // console.log(loadParkings[0].id);
-  // console.log("The address is : " + loadParkings[0].address);
-
-  // const tempRenderPark = (parking) =>{
-  //   return (
-  //     <>
-  //             <Text>dsfsfsd</Text>
-  //             <Text>The Address: {parking.address}</Text>
-  //             <Text>Description: {parking.description}</Text>
-  //             <Text>Price: {parking.price}</Text>
-  //             <Text>Image: {parking.imageUri}</Text>
-  //             {/* <Image source={{uri:parking.imageUri}} style={{width:125, height:150}} /> */}
-  //             <Text>Location: {parking.location}</Text>
-  //        </>
-  //   )
-  // }
-
-  
-
-  const renderParking = (parking) => {
-    if (!loadParkings || loadParkings.length === 0) {
-      return (
-        <View style={styles.container}>
-          <Text style={styles.text}>No Parking found ...</Text>
-        </View>
-      );
-    } else {
-      return (
-        <ParkingItem 
-        parking={parking}
-        backgroundColor={"black"}
-        />
-      )
-      //   <View key={parking.id} style={styles.item}>
-      //     <Text style={{ color: "black" }}>dsfsfsd</Text>
-      //     <Text>The Address: {parking.address}</Text>
-      //     <Text>Description: {parking.description}</Text>
-      //     <Text>Price: {parking.price}</Text>
-      //     {/* <Text>Image: {parking.imageUri}</Text> */}
-      //     <Image
-      //       source={{ uri: parking.imageUri }}
-      //       style={{
-      //         width: 260,
-      //         height: 300,
-      //         borderWidth: 2,
-      //         borderColor: "#d35647",
-      //         resizeMode: "contain",
-      //         margin: 8,
-      //       }}
-      //     />
-      //     <Text>Location: {parking.location}</Text>
-      //   </View>
-      // );
-    }
+  const handleSearchQuery = (query) => {
+    setSearchQuery(query);
+    console.log(searchQuery)
   };
+
+  const modifySearchParkings = () =>{
+    if(!loadParkings || loadParkings.length === 0){
+      return (<Text>Sorry , parking not found .</Text>)
+    }
+    setIsFilter(true)
+    let filterParkings = [];
+    filterParkings = loadParkings.filter((parking) => parking.title.includes(searchQuery))
+    setFilteredParkings(filterParkings)
+
+  }
+
+
+
 
   return (
     <View style={styles.cont}>
-      <FlatList
+      <View style={styles.topCont}>
+        <Button onPress={modifySearchParkings}>חפש</Button>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="  חיפוש לפי עיר"
+          onChangeText={handleSearchQuery}
+          value={searchQuery}
+        />
+      </View>
+    { !isFilter ? <FlatList
         data={loadParkings}
-        renderItem={({item,index})=>{
+        renderItem={({ item, index }) => {
           if (!loadParkings || loadParkings.length === 0) {
             return (
               <View style={styles.container}>
@@ -95,17 +69,25 @@ const DemoScreen = ({ route }) => {
               </View>
             );
           } else {
-            return (
-              <ParkingItem 
-              parking={item}
-              backgroundColor={"black"}
-              />
-            )
+            return <ParkingItem parking={item} backgroundColor={"black"} />;
           }
         }}
         keyExtractor={(item) => item.id}
-    
-      />
+      /> : <FlatList
+      data={filteredParkings}
+      renderItem={({ item, index }) => {
+        if (!filteredParkings || filteredParkings.length === 0) {
+          return (
+            <View style={styles.container}>
+              <Text style={styles.text}>No Parking found ...</Text>
+            </View>
+          );
+        } else {
+          return <ParkingItem parking={item} backgroundColor={"black"} />;
+        }
+      }}
+      keyExtractor={(item) => item.id}
+    /> }
     </View>
     // <View style={styles.cont}>
     //   <ParkingList parkings={loadParkings} />
@@ -133,5 +115,26 @@ const styles = StyleSheet.create({
     padding: 32,
     marginVertical: 8,
     marginHorizontal: 16,
+  },
+  searchInput: {
+    height: 40,
+    width: 180,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 10,
+    // marginBottom: 30,
+    marginLeft: 15,
+    textAlign: "right",
+  },
+  topCont: {
+    height: 40,
+    marginBottom: 20,
+
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    textAlign: "center",
+    alignItems: "center",
   },
 });

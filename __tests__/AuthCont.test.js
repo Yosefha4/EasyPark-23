@@ -2,8 +2,15 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import AuthContent from "../components/Auth/AuthContent";
 import FlatButton from "../components/ui/FlatButton";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { create, renderer } from "react-test-renderer";
+// import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+// const Stack = createNativeStackNavigator();
+
+// jest.mock("@react-navigation/native", () => ({
+//   useNavigation: jest.fn(),
+// }));
 
 describe("<AuthContent />", () => {
   it("should change the text in the button when pressed", () => {
@@ -28,90 +35,53 @@ describe("<AuthContent />", () => {
 
     expect(button.props.children).toEqual("כבר  יש לך חשבון ? התחבר ");
   });
+});
 
-  it("Should navigate to welcome screen on login",  () => {
-    
-    const navigation = {
-      navigate: jest.fn(),
-    };
-    
-    const tree = create(
+jest.mock("@react-navigation/native", () => ({
+  ...jest.requireActual("@react-navigation/native"),
+  useNavigation: jest.fn(),
+}));
+
+describe("AuthContent Navigation", () => {
+  const navigate = jest.fn();
+
+  beforeEach(() => {
+    useNavigation.mockReturnValue({ navigate });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should navigate to Signup screen when FlatButton is pressed and isLogin is true", () => {
+    const component = create(
       <NavigationContainer>
-      <AuthContent isLogin={false} onAuthenticate={jest.fn()} navigation={navigation} />,
+        <AuthContent isLogin={true} onAuthenticate={{}} />
       </NavigationContainer>
     );
-    const instance = tree.root;
+
+    const instance = component.root;
+
     const button = instance.findByType(FlatButton);
 
     button.props.onPress();
-    expect(navigation.navigate).toHaveBeenCalledWith("Login")
+
+    expect(navigate).toHaveBeenCalledWith("Signup");
   });
 
+  it("should navigate to Login screen when FlatButton is pressed and isLogin is false", () => {
+    const component = create(
+      <NavigationContainer>
+        <AuthContent isLogin={false} onAuthenticate={{}} />
+      </NavigationContainer>
+    );
 
+    const instance = component.root;
 
-  //   it('returns a token when valid email and password are provided', async () => {
-  //     // Arrange
-  //     const email = 'test@walla.com';
-  //     const password = '123456789';
-  //     const expectedToken = 'test-token';
+    const button = instance.findByType(FlatButton);
 
-  //     // Mock the onAuthenticate function that will be passed to AuthContent
-  //     const onAuthenticateMock = jest.fn().mockReturnValue(expectedToken);
+    button.props.onPress();
 
-  //     // Render the AuthContent component
-  //     const tree = create(
-  //       <NavigationContainer>
-
-  //       <AuthContent isLogin={true} onAuthenticate={onAuthenticateMock} />
-  //       </NavigationContainer>
-  //     );
-
-  //     // Get the submitHandler function from the AuthContent component
-  //     // const submitHandler = tree.root.findByProps({ testID: 'loginBtn' }).props.onPress;
-  //     const submitHandler = tree.root.findByType(FlatButton).props.onPress;
-
-  //     // Act
-  //     const actualToken = await submitHandler({
-  //       email: email,
-  //       confirmEmail: email,
-  //       password: password,
-  //       confirmPassword: password,
-  //     });
-
-  //     // Assert
-  //     expect(onAuthenticateMock).toHaveBeenCalledWith({ email, password });
-  //     expect(actualToken).toEqual(expectedToken);
-  //   });
+    expect(navigate).toHaveBeenCalledWith("Login");
+  });
 });
-
-// describe('AuthContent', () => {
-//     it('should switch to Signup screen when button is pressed and isLogin is true', () => {
-//       const navigation = {
-//         replace: jest.fn(),
-//       };
-//       const component = create(
-//         <NavigationContainer>
-//           <AuthContent isLogin={true} onAuthenticate={() => {}} navigation={navigation} />
-//         </NavigationContainer>
-//       );
-//       const instance = component.root;
-//       const button = instance.findByType(FlatButton);
-//       button.props.onPress();
-//       expect(navigation.replace).toHaveBeenCalledWith('Signup');
-//     });
-
-//     it('should switch to Login screen when button is pressed and isLogin is false', () => {
-//       const navigation = {
-//         replace: jest.fn(),
-//       };
-//       const component = create(
-//         <NavigationContainer>
-//           <AuthContent isLogin={false} onAuthenticate={() => {}} navigation={navigation} />
-//         </NavigationContainer>
-//       );
-//       const instance = component.root;
-//       const button = instance.findByType(FlatButton);
-//       button.props.onPress();
-//       expect(navigation.replace).toHaveBeenCalledWith('Login');
-//     });
-//   });

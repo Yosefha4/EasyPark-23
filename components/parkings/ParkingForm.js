@@ -34,11 +34,12 @@ const ParkingForm = ({ onCreateParking }) => {
         ownerParkingId : enterOwnerId,
         price: enterPrice,
         title: enterTitle,
+        isConfirm : false,
       });
-      Alert.alert("Your Share-Parking request has been sent ! ","We will contact you soon ")
+      Alert.alert("בקשת שיתוף החניה שלך נשלחה ! ","ניצור איתך קשר בהקדם . ")
     } catch (error) {
       console.log(error)
-      Alert.alert("Something went wrong..."," Please try again later or contact us ")
+      Alert.alert("משהו השתבש..."," אנא נסה שוב מאוחר יותר או צור איתנו קשר ")
 
     }
 
@@ -71,19 +72,19 @@ const ParkingForm = ({ onCreateParking }) => {
     setPicketLocation(location);
   }, []);
 
-  function savedDataInp() {
-    const parkingData = new Parking(
-      enterTitle,
-      pickedImage,
-      enterAddress,
-      enterDescription,
-      enterPrice,
-      enterOwnerId,
-      pickedLocation
-    );
-    onCreateParking(parkingData);
-    Alert.alert(`hey button : ${parkingData.imageUri}`, "Yosef");
-  }
+  // function savedDataInp() {
+  //   const parkingData = new Parking(
+  //     enterTitle,
+  //     pickedImage,
+  //     enterAddress,
+  //     enterDescription,
+  //     enterPrice,
+  //     enterOwnerId,
+  //     pickedLocation
+  //   );
+  //   onCreateParking(parkingData);
+  //   Alert.alert(`hey button : ${parkingData.imageUri}`, "Yosef");
+  // }
 
   return (
     <ScrollView style={styles.form}>

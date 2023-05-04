@@ -13,7 +13,6 @@ import Button from '../ui/Button';
 function AuthContent({ isLogin, onAuthenticate }) {
 
  const navigation =  useNavigation()
- const navigationRef = createNavigationContainerRef()
 
   const [credentialsInvalid, setCredentialsInvalid] = useState({
     email: false,
@@ -24,14 +23,15 @@ function AuthContent({ isLogin, onAuthenticate }) {
 
 
   function switchAuthModeHandler() {
+    // console.log("Yosef Test")
 
-    if(navigationRef.isReady()){
+
       if(isLogin){
         navigation.navigate('Signup')
       }else{
         navigation.navigate('Login')
       }
-    }
+  
     // Todo
  
   }

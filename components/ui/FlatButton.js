@@ -7,6 +7,7 @@ function FlatButton({ children, onPress }) {
     <Pressable
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}
       onPress={onPress}
+      testID='switchMode.test'
     >
       <View>
         <Text style={styles.buttonText}>{children}</Text>

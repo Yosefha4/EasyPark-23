@@ -7,13 +7,24 @@ import {
 } from "expo-image-picker";
 import { Button } from "react-native";
 import { Alert } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Colors } from "../../constants/styles";
 import OutlinedButton from "../ui/OutlinedButton";
 
-function ImagePicker({onTakeImage}) {
+import {ref,uploadBytes,getDownloadURL} from 'firebase/storage';
+import {storage} from '../../config/firebase' 
+
+function ImagePicker({ onTakeImage }) {
   const [pickedImage, setPickedImage] = useState();
   const [cameraPermissionInfo, requestPermission] = useCameraPermissions();
+
+  // useEffect(() => {
+  //   try {
+  //     verifyPermission()
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }, []);
 
   async function verifyPermission() {
     if (cameraPermissionInfo.status === PermissionStatus.UNDETERMINED) {
@@ -44,9 +55,45 @@ function ImagePicker({onTakeImage}) {
       quality: 0.5,
     });
     // console.log(image.assets[0].uri)
-    setPickedImage(image.assets[0].uri);
-    onTakeImage(image.assets[0].uri);
+    if (image.canceled) {
+      setPickedImage("");
+      onTakeImage("");
+    } else {
+      const uploadUrl = await uploadImageAsync(image.assets[0].uri);
+
+      setPickedImage(uploadUrl);
+      onTakeImage(uploadUrl);
+
+      console.log(image.assets[0].uri);
+    }
   }
+
+  const uploadImageAsync = async (uri) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+
+    try {
+      const storageRef = ref(storage, `Images/image-${Date.now()}`);
+      const result = await uploadBytes(storageRef, blob);
+
+      blob.close();
+
+      return await getDownloadURL(storageRef);
+    } catch (error) {
+      Alert.alert("Error", `: ${error}`);
+    }
+  };
 
   let imagePreview = <Text>עדיין לא צולמה תמונה</Text>;
   if (pickedImage) {
@@ -56,7 +103,9 @@ function ImagePicker({onTakeImage}) {
   return (
     <View>
       <View style={style.imagePreview}>{imagePreview}</View>
-      <OutlinedButton icon='camera' onPress={takeImageHandler} >צלם/העלה תמונה</OutlinedButton>
+      <OutlinedButton icon="camera" onPress={takeImageHandler}>
+        צלם/העלה תמונה
+      </OutlinedButton>
     </View>
   );
 }
@@ -70,11 +119,11 @@ const style = StyleSheet.create({
     marginVertical: 8,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 4,
   },
-  image:{
-    width:'100%',
-    height:'100%'
-  }
+  image: {
+    width: "100%",
+    height: "100%",
+  },
 });
