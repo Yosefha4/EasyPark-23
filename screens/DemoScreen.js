@@ -65,7 +65,7 @@ const DemoScreen = ({ route }) => {
           if (!loadParkings || loadParkings.length === 0) {
             return (
               <View style={styles.container}>
-                <Text style={styles.text}>No Parking found ...</Text>
+                <Text style={styles.text}>לא נמצאו חניות...</Text>
               </View>
             );
           } else {
@@ -79,7 +79,7 @@ const DemoScreen = ({ route }) => {
         if (!filteredParkings || filteredParkings.length === 0) {
           return (
             <View style={styles.container}>
-              <Text style={styles.text}>No Parking found ...</Text>
+              <Text style={styles.text}>לא נמצאו חניות...</Text>
             </View>
           );
         } else {

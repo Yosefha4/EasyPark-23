@@ -34,16 +34,15 @@ const ClockTimerCount = ({ parking }) => {
     console.log(error);
   }
 
-  console.log(rentDays);
+  // console.log(rentDays);
   console.log(currentSpotOwnerId);
 
   rentDays.map((item) => {
     if (item.matchOwnerId === currentSpotOwnerId) {
       isMatchId = true;
       matchArrayList.push(item)
-      console.log("Yes");
     } else {
-      console.log("Noo");
+      return;
     }
   });
 

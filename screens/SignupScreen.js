@@ -17,8 +17,8 @@ function SignupScreen() {
       authCtx.authenticate(token);
     } catch (error) {
       Alert.alert(
-        "Authentication failed!",
-        "Could not create user, Please check your input or try again later."
+        "אימות נכשל!",
+        "לא ניתן ליצור משתמש, אנא בדוק את הנתונים שהזנת או נסה שוב מאוחר יותר."
       );
       setIsAuthenticating(false);
 
