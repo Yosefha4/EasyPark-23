@@ -27,6 +27,7 @@ const ParkingItem = ({ parking }) => {
           source={{ uri: parking.imageUri }}
           style={{ width: 200, height: 200, marginTop: 24 }}
         />
+        {/* <Text>{parking.imageUri}</Text> */}
       </Pressable>
     </View>
   );

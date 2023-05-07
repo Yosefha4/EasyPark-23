@@ -1,5 +1,5 @@
 export class Parking {
-  constructor(title, imageUri, address,desc, price,location,enterOwnerId) {
+  constructor(title, imageUri, address,desc, price,location,enterOwnerId, isConfirm ) {
     this.title = title;
     this.imageUri = imageUri;
     this.address = address;
@@ -9,5 +9,8 @@ export class Parking {
     this.ownerParkingId = enterOwnerId,
 
     this.id = new Date().toString() + Math.random().toString();
+
+    // Add flag to check parking requests .
+    this.isConfirm = false ;
   }
 }

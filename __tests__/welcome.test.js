@@ -57,3 +57,33 @@ describe("WelcomeScreen", () => {
 
   });
 });
+
+describe("Welcome Screen Navigation", () => {
+  let tree;
+  const mockNavigation = { navigate: jest.fn() };
+  const mockAuthContext = { token: "mockToken" };
+
+  beforeEach(() => {
+    useNavigation.mockReturnValue(mockNavigation);
+
+    tree = renderer.create(
+      <AuthContext.Provider value={mockAuthContext}>
+        <WelcomeScreen />
+      </AuthContext.Provider>
+    );
+  });
+
+  afterEach(() => {
+    useNavigation.mockReset();
+    mockNavigation.navigate.mockReset();
+  });
+
+  it("navigates to PersonalScreen on button press", () => {
+    const button = tree.root.findByProps({ testID: "welcomeButton" });
+    button.props.onPress();
+
+    expect(mockNavigation.navigate).toHaveBeenCalledWith("Personal", {
+      token: "mockToken",
+    });
+  });
+});

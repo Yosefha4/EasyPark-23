@@ -1,12 +1,13 @@
-import React from 'react';
-import { create } from 'react-test-renderer';
-import AuthForm from '../components/Auth/AuthForm';
-import Button from '../components/ui/Button';
-import Input from '../components/Auth/Input';
-import { View } from 'react-native';
+import React from "react";
+import { create } from "react-test-renderer";
+import AuthForm from "../components/Auth/AuthForm";
+import Button from "../components/ui/Button";
+import Input from "../components/Auth/Input";
+import { View } from "react-native";
+import { fireEvent, render } from "@testing-library/react-native";
 
-describe('AuthForm', () => {
-  it('displays the correct button text based on isLogin prop', () => {
+describe("AuthForm", () => {
+  it("displays the correct button text based on isLogin prop", () => {
     const submitHandler = jest.fn();
     let isLogin = true;
     const component = create(
@@ -19,7 +20,7 @@ describe('AuthForm', () => {
     const instance = component.root;
 
     const button = instance.findByType(Button);
-    expect(button.props.children).toEqual('התחברות');
+    expect(button.props.children).toEqual("התחברות");
 
     isLogin = false;
     component.update(
@@ -30,41 +31,42 @@ describe('AuthForm', () => {
       />
     );
 
-    expect(button.props.children).toEqual('הרשמה');
+    expect(button.props.children).toEqual("הרשמה");
+  });
+
+  it("should show the valid inputs on Login mood", () => {
+    const submitHandler = jest.fn();
+
+    const component = create(
+      <AuthForm
+        isLogin={true}
+        onSubmit={submitHandler}
+        credentialsInvalid={{}}
+      />
+    );
+
+    const instance = component.root;
+    const theInputs = instance.findAllByType(Input)
+    
+    expect(theInputs.length).toEqual(2)
+
+  });
+
+  it("should show the valid inputs on SignUp mood", () => {
+    const submitHandler = jest.fn();
+
+    const component = create(
+      <AuthForm
+        isLogin={false}
+        onSubmit={submitHandler}
+        credentialsInvalid={{}}
+      />
+    );
+
+    const instance = component.root;
+    const theInputs = instance.findAllByType(Input)
+    
+    expect(theInputs.length).toEqual(4)
+
   });
 });
-
-// describe("Input Validation" , () => {
-//   const mockSubmitHandler = jest.fn();
-
-  // describe("Valid Input" , () => {
-  //   const component = create(
-  //     <View>
-  //       <Input
-  //         label="Email Address"
-  //         onUpdateValue={() => {}}
-  //         value="test@example.com"
-  //         keyboardType="email-address"
-  //         isInvalid={false}
-  //       />
-  //       <Input
-  //         label="Password"
-  //         onUpdateValue={() => {}}
-  //         secure
-  //         value="password123"
-  //         isInvalid={false}
-  //       />
-  //     </View>,
-  //   );
-  //   it("render without errors" , () => {
-  //     expect(component.toJSON()).toMatchSnapshot();
-  //   });
-
-  //   it('calls submit handler on button press', () => {
-  //     const button = component.root.findByProps({ testID: 'loginBtn' });
-  //     button.props.onPress();
-  //     expect(mockSubmitHandler).toHaveBeenCalled();
-  //   });
-
-  // })
-// })

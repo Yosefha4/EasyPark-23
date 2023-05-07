@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import MapView, { Marker , PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
+import * as Location from "expo-location";
+// import Button from "../components/ui/Button";
 
 import PinImageMarker from "../assets/pinM.png";
 
@@ -10,33 +12,45 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
 import ParkingDetails from "./ParkingDetails";
 import ParkingItem from "../components/parkings/ParkingItem";
+import { Alert } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const Tab = createBottomTabNavigator();
-
-
-const markers = [
-  {
-    mark1: { latitude: 31.423196, longitude: 34.595254 },
-    mark2: { latitude: 32.109333, longitude: 34.855499 },
-    mark3: { latitude: 31.66926, longitude: 34.57149 },
-  },
-];
-// const markers = [
-//   {mark1:{latitude :31.423196, longitude: 34.595254},},
-//   {mark2:{latitude :32.109333, longitude: 34.855499},},
-//   {mark3:{latitude :31.66926, longitude: 34.57149},},
-// ]
-
-
-
 
 const MapScreen = () => {
   const [parkingsMarkers, setParkingsMarkers] = useState([]);
   const [loadingParking, setLoadingParking] = useState(false);
-  // const isFocused = useIsFocused();
+  const [filterParkings, setFilterParkings] = useState([]);
 
-  
-const navigation = useNavigation();
+  const navigation = useNavigation();
+
+  // ********** //
+  const [showRadiusCircle, setShowRadiusCircle] = useState(false);
+
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 31.771959,
+    longitude: 35.217018,
+    latitudeDelta: 1.8524,
+    longitudeDelta: 0.4648,
+  });
+
+  const handleShowLocation = async () => {
+    const { granted } = await Location.requestForegroundPermissionsAsync();
+    if (!granted) {
+      alert("Permission to access location was denied");
+      return;
+    }
+    const { coords } = await Location.getCurrentPositionAsync({});
+    setCurrentLocation(coords);
+  };
+
+  const displayCircleOnMap = () => {
+    setShowRadiusCircle(!showRadiusCircle);
+  };
+
+  // ********** //
 
   useEffect(() => {
     setLoadingParking(true);
@@ -45,50 +59,141 @@ const navigation = useNavigation();
       let parkingList = [];
       snap.docs.map((doc) => parkingList.push({ ...doc.data(), id: doc.id }));
       setParkingsMarkers(parkingList);
+      filterConfirmParkings();
       setLoadingParking(false);
     });
-  }, []);
 
-//   const handelParking = (id) =>{
-//     for(let i = 0 ; i<parkingsMarkers.length;i++){
-//       console.log(parkingsMarkers[i])
-// }
- 
-    
-    
-//   }
-  
+    handleShowLocation();
+  }, [currentLocation]);
 
+  const filterConfirmParkings = async () => {
+    try {
+      const filteredPark = await parkingsMarkers.filter(
+        (parking) => parking.isConfirm === true
+      );
+      setFilterParkings(filteredPark);
+    } catch (error) {
+      Alert.alert(error);
+    }
+  };
+
+  const handleZoomIn = () => {
+    let newRegion;
+    if(currentLocation){
+       newRegion = {
+        latitude: currentLocation.latitude,
+        longitude:currentLocation.longitude,
+        latitudeDelta: mapRegion.latitudeDelta / 2,
+        longitudeDelta: mapRegion.longitudeDelta / 2 ,
+      }
+    }
+    else{
+       newRegion = {
+        ...mapRegion,
+        latitudeDelta: mapRegion.latitudeDelta / 2,
+        longitudeDelta: mapRegion.longitudeDelta / 2 ,
+      };
+    }
+
+    setMapRegion(newRegion);
+  };
+
+  const handleZoomOut = () => {
+    let newRegion;
+    if(currentLocation){
+       newRegion = {
+        latitude: currentLocation.latitude,
+        longitude:currentLocation.longitude,
+        latitudeDelta: mapRegion.latitudeDelta * 2,
+        longitudeDelta: mapRegion.longitudeDelta * 2 ,
+      }
+    }
+    else{
+       newRegion = {
+        ...mapRegion,
+        latitudeDelta: mapRegion.latitudeDelta * 2,
+        longitudeDelta: mapRegion.longitudeDelta * 2 ,
+      };
+    }
+    setMapRegion(newRegion);
+  };
+
+  // const filterParkings = parkingsMarkers.filter((parking) => parking.isConfirm = true);
+
+  // console.log(filterParkings)
 
   return (
     <View style={styles.cont}>
-      {/* <Text>PersonalScreen</Text> */}
       <MapView
-        initialRegion={{
-          latitude: 31.771959,
-          longitude: 35.217018,
-          latitudeDelta: 1.8524,
-          longitudeDelta: 0.4648,
-        }}
-        provider={PROVIDER_GOOGLE }
+        region={mapRegion}
+        // region={{
+        //   latitude: currentLocation ? currentLocation.latitude : 31.771959,
+        //   longitude: currentLocation ? currentLocation.longitude : 35.217018,
+        //   latitudeDelta: 1.8524,
+        //   longitudeDelta: 0.4648,
+        // }}
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
+        showsUserLocation
       >
-        {/* {markers.map((marker, index) => (
-          <Marker
-            key={index}
-            coordinate={{
-              latitude: marker.latitude,
-              longitude: marker.longitude,
-            }}
-          />
-         
-        ))} */}
-       { parkingsMarkers.map((parking) => (
-          <Marker onPress={()=> navigation.navigate("Parkingdetails", {parking})} key={parking.id} coordinate={{latitude:parking.location.lat, longitude:parking.location.lng}} title={parking.title} description={`${parking.price}₪ / שעה`} />
-       ))}
+        {filterParkings &&
+          filterParkings.map((parking) => (
+            <Marker
+              onPress={() => navigation.navigate("Parkingdetails", { parking })}
+              key={parking.id}
+              coordinate={{
+                latitude: parking.location.lat,
+                longitude: parking.location.lng,
+              }}
+              title={parking.title}
+              description={`${parking.price}₪ / שעה`}
+            />
+          ))}
 
-        {/* <Marker coordinate={{latitude :31.423196, longitude: 34.595254}} /> */}
+        {/* {showRadiusCircle && (
+          <Marker
+            key={currentLocation.latitude + Math.random(15)}
+            coordinate={{
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            }}
+            pinColor="blue"
+          />
+        )} */}
+
+        {showRadiusCircle && currentLocation && (
+          <Circle
+            center={{
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            }}
+            radius={20000}
+            strokeColor={"rgba(158, 158, 255, 1)"}
+            fillColor={"rgba(158, 158, 255, 0.3)"}
+            strokeWidth={2}
+          />
+        )}
+
+        <View style={styles.topContainer}>
+          <View style={styles.showBtn}>
+            <Button
+              title="הצג מיקום"
+              onPress={displayCircleOnMap}
+              color="black"
+            />
+          </View>
+       
+            <View style={styles.icons}>
+              <Icon name="plus-square-o" size={40} style={{marginRight:8}} onPress={handleZoomIn} />
+              <Icon name="minus-square-o" size={40} onPress={handleZoomOut} />
+            </View>
+
+            </View>
+
+       
       </MapView>
+      {/* <Icon /> */}
+      {/* <Button onPress={displayCircleOnMap}>Show My Location</Button> */}
     </View>
   );
 };
@@ -108,4 +213,34 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+
+  showBtn: {
+    backgroundColor: "transparent",
+    position: "absolute",
+
+    // width:150,
+    // top:15,left:20,
+    borderWidth: 1,
+    borderColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    borderRadius: 6,
+    fontWeight: "bold",
+  },
+  topContainer: {
+    flexDirection: 'column',
+    
+    // alignItems: 'flex-start',
+    // justifyContent: 'space-between',
+  },
+  icons:{
+    flexDirection: 'row',
+  //  marginTop:24,
+  //  padding:40,
+   paddingHorizontal:12,
+   paddingVertical:50
+
+  }
+
 });
