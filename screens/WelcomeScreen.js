@@ -50,7 +50,10 @@ function WelcomeScreen() {
         <Image style={styles.image} source={welcImg} testID="welcomeImage" />
       </View>
 
-      <Button testID='welcomeButton' onPress={()=> navigation.navigate('Personal', {token})} >המשך         </Button>
+      <Button testID='welcomeButton' onPress={()=> {
+        navigation.navigate('Personal', {token})
+        console.log("The token is : "+token)
+        } }  >המשך         </Button>
 
     </View>
   );

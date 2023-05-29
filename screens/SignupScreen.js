@@ -16,6 +16,7 @@ function SignupScreen() {
       const token = await createUser(email, password);
       authCtx.authenticate(token);
     } catch (error) {
+      console.log(error)
       Alert.alert(
         "אימות נכשל!",
         "לא ניתן ליצור משתמש, אנא בדוק את הנתונים שהזנת או נסה שוב מאוחר יותר."

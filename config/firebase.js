@@ -10,7 +10,7 @@ import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "****",
+  apiKey: "AIzaSyB1gr5GOBC-KKAHUqpZlPhVYNprk3BlOr4",
   authDomain: "easypark-react-native.firebaseapp.com",
   databaseURL: "https://easypark-react-native-default-rtdb.firebaseio.com",
   projectId: "easypark-react-native",
@@ -28,4 +28,3 @@ const storage = getStorage(app);
 export {app, storage};
 
 // const analytics = getAnalytics(app);
-...
