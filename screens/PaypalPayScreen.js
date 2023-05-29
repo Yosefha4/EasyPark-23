@@ -167,7 +167,7 @@ const PaypalPayScreen = ({ route }) => {
             <WebView
               source={{
                 uri:
-                  "https://easypark-787c4.web.app?parkingPrice=" +
+                  "***" +
                   timeForPrice * currrentParking.price,
               }}
               style={{ flex: 1 }}
