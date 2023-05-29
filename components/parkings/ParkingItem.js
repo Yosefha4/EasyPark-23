@@ -13,7 +13,8 @@ const ParkingItem = ({ parking }) => {
           )
         }
       >
-        <Text style={styles.title}>{parking.title}</Text>
+        <Text style={styles.title}>{parking.address}</Text>
+        {/* <Text style={styles.title}>{parking.title}</Text> */}
         {/* <Text style={{textAlign:'right'}}>{parking.address}</Text> */}
         {/* <Text>ParkingOwnerId : {parking.ownerParkingId}</Text> */}
         {/* <Text>{parking.desc}</Text> */}
@@ -21,6 +22,8 @@ const ParkingItem = ({ parking }) => {
         {/* <Text>{parking.imageUri}</Text> */}
         {/* <Text>{parking.id}</Text> */}
         <Text style={{ textAlign: "right" }}>{parking.description}</Text>
+
+        {<Image  source={parking.imageUri}/>}
 
         {/* <Text>{`Location :{ lat: ${parking.location.lat} , lng: ${parking.location.lng}}`}</Text> */}
         <Image

@@ -1,14 +1,14 @@
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { Colors } from "../../constants/styles";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
 import Button from "../ui/Button";
 import { useNavigation } from "@react-navigation/native";
 import { Alert } from "react-native";
-import { Parking } from "../../models/parking";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../config/firebase";
+import { AuthContext } from "../../store/contextAuth";
 
 const ParkingForm = ({ onCreateParking }) => {
   const navigation = useNavigation();
@@ -20,38 +20,33 @@ const ParkingForm = ({ onCreateParking }) => {
   const [enterPrice, setEnterPrice] = useState("");
   const [enterDescription, setEnterDescription] = useState("");
   const [enterOwnerId, setEnterOwnerId] = useState("");
+  const [enterOwnerName, setEnterOwnerName] = useState("");
 
-  function addParking() {
+  const { token, isAuthenticated } = useContext(AuthContext);
+
+  async function addParking() {
     try {
       const parkingDb = collection(db, "parkings");
-      addDoc(parkingDb, {
+      await addDoc(parkingDb, {
         address: enterAddress,
         description: enterDescription,
         imageUri: pickedImage,
-        location: {lat:pickedLocation.lat,lng:pickedLocation.lng},
+        location: { lat: pickedLocation.lat, lng: pickedLocation.lng },
         // location: pickedLocation.toString(),
-        parkingID: new Date().toString() + Math.random().toString(),
-        ownerParkingId : enterOwnerId,
+        parkingID: token,
+        ownerParkingId: enterOwnerId,
+        ownerName: enterOwnerName,
         price: enterPrice,
-        title: enterTitle,
-        isConfirm : false,
+        // title: enterTitle,
+        isConfirm: false,
       });
-      Alert.alert("בקשת שיתוף החניה שלך נשלחה ! ","ניצור איתך קשר בהקדם . ")
+      Alert.alert("בקשת שיתוף החניה שלך נשלחה ! ", "ניצור איתך קשר בהקדם . ");
     } catch (error) {
-      console.log(error)
-      Alert.alert("משהו השתבש..."," אנא נסה שוב מאוחר יותר או צור איתנו קשר ")
-
+      console.log(error);
+      Alert.alert("משהו השתבש...", " אנא נסה שוב מאוחר יותר או צור איתנו קשר ");
     }
-
   }
 
-//  function editAvailableFunc(){
-//   navigation.navigate("EditParkingDetails")
-//  }
-
-  function changeTitleHandler(enterText) {
-    setEnterTitle(enterText);
-  }
   function changeAddressHandler(enterText) {
     setEnterAddress(enterText);
   }
@@ -64,6 +59,9 @@ const ParkingForm = ({ onCreateParking }) => {
   function changeOwnerId(enterText) {
     setEnterOwnerId(enterText);
   }
+  function changeOwnerName(enterText) {
+    setEnterOwnerName(enterText);
+  }
   function takeImageHandler(imageUri) {
     setPickedImage(imageUri);
   }
@@ -72,31 +70,9 @@ const ParkingForm = ({ onCreateParking }) => {
     setPicketLocation(location);
   }, []);
 
-  // function savedDataInp() {
-  //   const parkingData = new Parking(
-  //     enterTitle,
-  //     pickedImage,
-  //     enterAddress,
-  //     enterDescription,
-  //     enterPrice,
-  //     enterOwnerId,
-  //     pickedLocation
-  //   );
-  //   onCreateParking(parkingData);
-  //   Alert.alert(`hey button : ${parkingData.imageUri}`, "Yosef");
-  // }
-
   return (
     <ScrollView style={styles.form}>
       <Text style={styles.title}>רוצה לפרסם את החניה ? </Text>
-      <View>
-        <Text style={styles.label}>כותרת</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={changeTitleHandler}
-          value={enterTitle}
-        />
-      </View>
       <View>
         <Text style={styles.label}>כתובת (עיר , רחוב , מספר בית)</Text>
         <TextInput
@@ -111,6 +87,14 @@ const ParkingForm = ({ onCreateParking }) => {
           style={styles.input}
           onChangeText={changeOwnerId}
           value={enterOwnerId}
+        />
+      </View>
+      <View>
+        <Text style={styles.label}>שם מלא בעל החניה</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={changeOwnerName}
+          value={enterOwnerName}
         />
       </View>
       <View>
@@ -131,14 +115,10 @@ const ParkingForm = ({ onCreateParking }) => {
       </View>
       <ImagePicker onTakeImage={takeImageHandler} />
       <LocationPicker onTakeLocation={takeLocationHandler} />
-      <View style={{display:'flex',alignItems:'center'}}>
-      {/* <View style={{ marginTop: 44, width:150 ,alignItems:'center'}}>
-        <Button onPress={editAvailableFunc}>Edit Availability </Button>
-      </View> */}
-      <View style={{ marginTop: 44, marginBottom: 50 ,width:300}}>
-        <Button onPress={addParking}>שליחה</Button>
-      </View>
-
+      <View style={{ display: "flex", alignItems: "center" }}>
+        <View style={{ marginTop: 44, marginBottom: 50, width: 300 }}>
+          <Button onPress={addParking}>שליחה</Button>
+        </View>
       </View>
     </ScrollView>
   );
@@ -151,13 +131,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: "#e4f4f4",
-    
   },
   label: {
     fontWeight: "bold",
     // marginBottom: 4,
     color: Colors.primary500,
-    textAlign:'right'
+    textAlign: "right",
   },
   input: {
     // marginVertical: 8,
@@ -166,9 +145,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderBottomColor: Colors.primary800,
     borderBottomWidth: 2,
-    backgroundColor: 'white',
-    textAlign:'right',
-    marginBottom:16
+    backgroundColor: "white",
+    textAlign: "right",
+    marginBottom: 16,
   },
   DescriptionInput: {
     marginVertical: 8,
@@ -177,9 +156,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderBottomColor: Colors.primary800,
     borderBottomWidth: 2,
-    backgroundColor: 'white',
-    textAlign:'right',
-    height:150,
+    backgroundColor: "white",
+    textAlign: "right",
+    height: 150,
   },
   title: {
     marginVertical: 48,

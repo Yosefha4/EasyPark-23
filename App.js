@@ -21,6 +21,8 @@ import ParkingDetails from "./screens/ParkingDetails";
 import EditParkingDetails from "./screens/EditParkingDetails";
 import ProfileDet from "./screens/ProfileDet";
 import EditProfileDetails from "./screens/EditProfileDetails";
+import PaypalPayScreen from "./screens/PaypalPayScreen";
+import ManageParking from "./screens/ManageParking";
 
 
 const Stack = createNativeStackNavigator();
@@ -35,8 +37,8 @@ function AuthStack() {
         contentStyle: { backgroundColor: Colors.primary100 },
       }}
     >
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen name="Login" component={LoginScreen}  options={{title:'התחברות', }} />
+      <Stack.Screen name="Signup" component={SignupScreen}  options={{title:'הרשמה', }} />
     </Stack.Navigator>
  
   );
@@ -78,6 +80,9 @@ function AuthenticatedStack() {
       <Stack.Screen name="Parkingdetails" component={ParkingDetails} options={{title:'', }} />
       <Stack.Screen name="EditParkingDetails" component={EditParkingDetails} options={{title:'', }} />
       <Stack.Screen name="EditProfileD" component={EditProfileDetails} options={{title:'', }} />
+      <Stack.Screen name="Paypal" component={PaypalPayScreen} />
+      <Stack.Screen name="ManageP" component={ManageParking} />
+
     </Stack.Navigator>
 
   );

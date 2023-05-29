@@ -24,8 +24,8 @@ function LoginScreen() {
      
     } catch (error) {
       Alert.alert(
-        'Authentication failed!',
-        'Could not log you in. Please check your credentials or try again later!'
+        'אימות נכשל!',
+        'לא ניתן להתחבר. אנא בדוק את הנתונים שלך ונסה שוב מאוחר יותר!'
       );
       setIsAuthenticating(false);
 
