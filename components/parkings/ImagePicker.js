@@ -18,13 +18,6 @@ function ImagePicker({ onTakeImage }) {
   const [pickedImage, setPickedImage] = useState();
   const [cameraPermissionInfo, requestPermission] = useCameraPermissions();
 
-  // useEffect(() => {
-  //   try {
-  //     verifyPermission()
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }, []);
 
   async function verifyPermission() {
     if (cameraPermissionInfo.status === PermissionStatus.UNDETERMINED) {

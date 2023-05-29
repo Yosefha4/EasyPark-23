@@ -17,12 +17,14 @@ import Icon from "react-native-vector-icons/FontAwesome";
 
 const Tab = createBottomTabNavigator();
 
-const MapScreen = () => {
+const MapScreen = ({route}) => {
   const [parkingsMarkers, setParkingsMarkers] = useState([]);
   const [loadingParking, setLoadingParking] = useState(false);
   const [filterParkings, setFilterParkings] = useState([]);
 
   const navigation = useNavigation();
+
+
 
   // ********** //
   const [showRadiusCircle, setShowRadiusCircle] = useState(false);
@@ -139,7 +141,11 @@ const MapScreen = () => {
         {filterParkings &&
           filterParkings.map((parking) => (
             <Marker
-              onPress={() => navigation.navigate("Parkingdetails", { parking })}
+              onPress={() => {
+                navigation.navigate("Parkingdetails", { parking  })
+                
+              }
+              }
               key={parking.id}
               coordinate={{
                 latitude: parking.location.lat,

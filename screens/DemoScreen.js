@@ -16,6 +16,8 @@ const DemoScreen = ({ route }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredParkings, setFilteredParkings] = useState([]);
   const [isFilter, setIsFilter] = useState(false);
+
+  const [allowsParkings, setAllowsParkings] = useState([]);
   // const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -25,28 +27,39 @@ const DemoScreen = ({ route }) => {
       let parkingList = [];
       snap.docs.map((doc) => parkingList.push({ ...doc.data(), id: doc.id }));
       setLoadParkings(parkingList);
+
+      filterAllowsParkings();
+
       setIsLoad(false);
     });
   }, []);
 
   const handleSearchQuery = (query) => {
     setSearchQuery(query);
-    console.log(searchQuery)
   };
 
-  const modifySearchParkings = () =>{
-    if(!loadParkings || loadParkings.length === 0){
-      return (<Text>Sorry , parking not found .</Text>)
+  const modifySearchParkings = () => {
+    if (!loadParkings || loadParkings.length === 0) {
+      return <Text>Sorry , parking not found .</Text>;
     }
-    setIsFilter(true)
+    setIsFilter(true);
     let filterParkings = [];
-    filterParkings = loadParkings.filter((parking) => parking.title.includes(searchQuery))
-    setFilteredParkings(filterParkings)
+    filterParkings = loadParkings.filter((parking) =>
+      parking.title.includes(searchQuery)
+    );
+    setFilteredParkings(filterParkings);
+  };
 
-  }
-
-
-
+  const filterAllowsParkings = async () => {
+    try {
+      const filteredPark = await loadParkings.filter(
+        (parking) => parking.isConfirm === true
+      );
+      setAllowsParkings(filteredPark);
+    } catch (error) {
+      Alert.alert(error);
+    }
+  };
 
   return (
     <View style={styles.cont}>
@@ -59,35 +72,39 @@ const DemoScreen = ({ route }) => {
           value={searchQuery}
         />
       </View>
-    { !isFilter ? <FlatList
-        data={loadParkings}
-        renderItem={({ item, index }) => {
-          if (!loadParkings || loadParkings.length === 0) {
-            return (
-              <View style={styles.container}>
-                <Text style={styles.text}>No Parking found ...</Text>
-              </View>
-            );
-          } else {
-            return <ParkingItem parking={item} backgroundColor={"black"} />;
-          }
-        }}
-        keyExtractor={(item) => item.id}
-      /> : <FlatList
-      data={filteredParkings}
-      renderItem={({ item, index }) => {
-        if (!filteredParkings || filteredParkings.length === 0) {
-          return (
-            <View style={styles.container}>
-              <Text style={styles.text}>No Parking found ...</Text>
-            </View>
-          );
-        } else {
-          return <ParkingItem parking={item} backgroundColor={"black"} />;
-        }
-      }}
-      keyExtractor={(item) => item.id}
-    /> }
+      {!isFilter ? (
+        <FlatList
+          data={allowsParkings}
+          renderItem={({ item, index }) => {
+            if (!allowsParkings || allowsParkings.length === 0) {
+              return (
+                <View style={styles.container}>
+                  <Text style={styles.text}>לא נמצאו חניות...</Text>
+                </View>
+              );
+            } else {
+              return <ParkingItem parking={item} backgroundColor={"black"} />;
+            }
+          }}
+          keyExtractor={(item) => item.id}
+        />
+      ) : (
+        <FlatList
+          data={filteredParkings}
+          renderItem={({ item, index }) => {
+            if (!filteredParkings || filteredParkings.length === 0) {
+              return (
+                <View style={styles.container}>
+                  <Text style={styles.text}>לא נמצאו חניות...</Text>
+                </View>
+              );
+            } else {
+              return <ParkingItem parking={item} backgroundColor={"black"} />;
+            }
+          }}
+          keyExtractor={(item) => item.id}
+        />
+      )}
     </View>
     // <View style={styles.cont}>
     //   <ParkingList parkings={loadParkings} />
