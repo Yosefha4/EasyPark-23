@@ -14,7 +14,7 @@ import moment from "moment";
 import { db } from "../config/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { AuthContext } from "../store/contextAuth";
-
+import {sendPushNotificationHandler} from '../components/parkings/ClockTimerCount'
 
 
 const PaypalPayScreen = ({ route }) => {
@@ -22,6 +22,7 @@ const PaypalPayScreen = ({ route }) => {
   const currrentParking = route.params.parking;
   const dayForCalc = route.params.item.availDays;
   const currentItem = route.params.item;
+  const pushTokenId = route.params.CurrentElement;
   
   const [timeForPrice,setTimeForPrice] = useState(0);
   const [totalAmount , setTotalAmount] = useState(0);
@@ -43,6 +44,7 @@ const PaypalPayScreen = ({ route }) => {
     if (dayForCalc) {
       // calculateDuration();
       calcTotalAmount();
+      // sendPushNotificationHandler();
       // console.log("The Total is   : " + timeForPrice)
     }
   }, [dayForCalc,currrentParking]);
@@ -61,6 +63,7 @@ const PaypalPayScreen = ({ route }) => {
   console.log(totalAmount)
   console.log(timeForPrice)
   console.log(currrentParking.price)
+  console.log("currrentParking.price" , pushTokenId)
 
 
 
@@ -123,6 +126,7 @@ const PaypalPayScreen = ({ route }) => {
 
       try {
         await handleRentButtonPress(currentItem.id)
+        await sendPushNotificationHandler();
       } catch (error) {
         console.log(error)
       }
@@ -130,6 +134,22 @@ const PaypalPayScreen = ({ route }) => {
     } else {
       alert("התשלום נכשל. אנא נסה שוב מאוחר יותר.");
     }
+  }
+
+ async function sendPushNotificationHandler() {
+   await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // to: "ExponentPushToken[***]",
+        to: `${pushTokenId}`,
+        title: "עדכון מ - EasyPark",
+        body: "מישהו השכיר את החניה שלך !",
+        sound: "default", // Specify the sound for the notification
+      }),
+    });
   }
 
   return (

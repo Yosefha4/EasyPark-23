@@ -1,28 +1,19 @@
-import { FlatList, StyleSheet, Text, View ,Pressable} from "react-native";
+import { FlatList, StyleSheet, Text, View, Pressable } from "react-native";
 import React from "react";
-import ParkingItem from "./ParkingItem";
-
-
-
-
 
 const ParkingList = ({ parkings }) => {
-
-  const renderParking = (parking) =>{
+  const renderParking = (parking) => {
     return (
-    
-        <View>
-          <Text>sdasadasdasd{parking.title}</Text>
-          <Text>{parking.address}</Text>
-          <Text>{parking.desc}</Text>
-          <Text>{parking.price}</Text>
-          <Text>{parking.imageUri}</Text>
-          <Text>{parking.id}</Text>
-        </View>
-   
-    )
-  }
-
+      <View>
+        <Text>sdasadasdasd{parking.title}</Text>
+        <Text>{parking.address}</Text>
+        <Text>{parking.desc}</Text>
+        <Text>{parking.price}</Text>
+        <Text>{parking.imageUri}</Text>
+        <Text>{parking.id}</Text>
+      </View>
+    );
+  };
 
   if (!parkings || parkings.length === 0) {
     return (
@@ -35,7 +26,7 @@ const ParkingList = ({ parkings }) => {
     <FlatList
       data={parkings}
       keyExtractor={(item) => item.id}
-      render={({ item }) => renderParking(item) }
+      render={({ item }) => renderParking(item)}
     />
   );
 };
@@ -50,6 +41,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    color:'black'
+    color: "black",
   },
 });

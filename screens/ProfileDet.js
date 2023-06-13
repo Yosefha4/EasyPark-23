@@ -5,8 +5,6 @@ import {
   Text,
   View,
   Image,
-  TouchableOpacity,
-  FlatList,
   Button,
   Pressable,
   Modal,
@@ -15,19 +13,21 @@ import { Colors } from "../constants/styles";
 import { AuthContext } from "../store/contextAuth";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
+import { Alert } from "react-native";
 
-export default ProfileDet = ({ route }) => {
+export default ProfileDet = () => {
   const navigation = useNavigation();
 
   const { token, isAuthenticated } = useContext(AuthContext);
 
   const [currentDetails, setCurrentDetails] = useState([]);
-  const [userDet, setUserDet] = useState([])
+  const [userDet, setUserDet] = useState([]);
 
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
-  const [selectedImage, setSelectedImage] = useState("https://bootdey.com/img/Content/avatar/avatar3.png");
-
+  const [selectedImage, setSelectedImage] = useState(
+    "https://bootdey.com/img/Content/avatar/avatar3.png"
+  );
 
   const handleImagePress = () => {
     setShowOptions(true);
@@ -39,150 +39,66 @@ export default ProfileDet = ({ route }) => {
     setShowOptions(false);
   };
 
-
   useEffect(() => {
-
     const dummyFunc = async () => {
       const parkingQuery = collection(db, "parkings");
       await onSnapshot(parkingQuery, (snap) => {
         let currentParking = [];
-        snap.docs.map((doc) => currentParking.push({ ...doc.data(), id: doc.id }));
+        snap.docs.map((doc) =>
+          currentParking.push({ ...doc.data(), id: doc.id })
+        );
         setCurrentDetails(currentParking);
-        // currentDetails.filter((item) => item.ownerParkingId !== token)
       });
-    }
+    };
     dummyFunc();
   }, []);
 
-  useEffect(() =>{
-    if(currentDetails){
-      currentDetails.forEach((item)=>{
-        if(item.parkingID === token){
-          console.log("We have a match !");
-          setUserDet(item)
+  useEffect(() => {
+    if (currentDetails) {
+      currentDetails.forEach((item) => {
+        if (item.parkingID === token) {
+          setUserDet(item);
         }
-      })
+      });
     }
-  },[currentDetails])
+  }, [currentDetails]);
 
-  // console.log(token)
-  // console.log(currentDetails)
-  console.log( userDet)
+  const isUserParkingOwner = currentDetails.some(
+    (detail) => detail.parkingID === token
+  );
+
+  const userEmail = userDet ?  userDet.ownerEmail: "id"
+
+  console.log(userEmail)
 
 
-  const thisUserDet = route.params;
-
-  // let nameEntered;
-  // let phoneEntered;
-
-  // if (thisUserDet.enterName) {
-  //   nameEntered = thisUserDet.enterName;
-  // }
-  // if (thisUserDet.enterPhone) {
-  //   phoneEntered = thisUserDet.enterPhone;
-  // }
-
-  // console.log(thisUserDet.currentUser.token)
-
-  const data = [
-    {
-      id: 1,
-      image: "https://img.icons8.com/color/70/000000/cottage.png",
-      title: "Order",
-    },
-    {
-      id: 2,
-      image: "https://img.icons8.com/color/70/000000/administrator-male.png",
-      title: "Like",
-    },
-    {
-      id: 3,
-      image: "https://img.icons8.com/color/70/000000/filled-like.png",
-      title: "Comment",
-    },
-    {
-      id: 4,
-      image: "https://img.icons8.com/color/70/000000/facebook-like.png",
-      title: "Download",
-    },
-    {
-      id: 5,
-      image: "https://img.icons8.com/color/70/000000/shutdown.png",
-      title: "Edit",
-    },
-  ];
-
-  const [options, setOptions] = useState(data);
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-        <Pressable onPress={handleImagePress}>
-            <Image
-              style={styles.avatar}
-              source={{
-                uri: selectedImage,
-              }}
-            />
-          </Pressable>
-          <Text style={styles.username}>{userDet ? userDet.ownerName : ""}</Text>
-        </View>
-        
-        <Modal visible={showOptions} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <Pressable style={styles.optionButton} onPress={() => handleOptionSelect("option1","https://bootdey.com/img/Content/avatar/avatar1.png")}>
-            <Image
-              style={styles.optionImage}
-              source={{
-                uri: "https://bootdey.com/img/Content/avatar/avatar1.png",
-              }}
-            />
-          </Pressable>
-          <Pressable style={styles.optionButton} onPress={() => handleOptionSelect("option2","https://bootdey.com/img/Content/avatar/avatar2.png")}>
-            <Image
-              style={styles.optionImage}
-              source={{
-                uri: "https://bootdey.com/img/Content/avatar/avatar2.png",
-              }}
-            />
-          </Pressable>
-          <Pressable style={styles.optionButton} onPress={() => handleOptionSelect("option3","https://bootdey.com/img/Content/avatar/avatar3.png")}>
-            <Image
-              style={styles.optionImage}
-              source={{
-                uri: "https://bootdey.com/img/Content/avatar/avatar3.png",
-              }}
-            />
-          </Pressable>
-          <Button title="ביטול" onPress={() => setShowOptions(false)}  color="white" />
-        </View>
-      </Modal>
-      </View>
-
-      <View style={styles.body}>
-        <View style={styles.btnCont}>
+  const renderButtons = () => {
+    if (isUserParkingOwner) {
+      return (
+        <>
           <Pressable style={styles.pressable}>
             <Button
               title="בקשה לפרסום חניה"
               color="black"
-              onPress={() => navigation.navigate("AddParking")}
+              onPress={() =>Alert.alert("כבר יש ברשותך חניה","לא ניתן לשלב מספר חניות למשתמש...")}
+              // onPress={() => navigation.navigate("AddParking")}
             />
           </Pressable>
           <Pressable style={styles.pressable}>
             <Button
-              title="עריכת פרטי חניה"
+              title="זמינות חניה"
               color="black"
-              onPress={() =>
+              onPress={() =>{ userDet.isConfirm ? 
                 navigation.navigate("EditParkingDetails", {
                   title: "",
-                })
+                }) : Alert.alert("החניה בהמתנה לאישור המנהלים" , "אנא נסו שוב מאוחר יותר")}
               }
+              testID="editParkBtn"
             />
           </Pressable>
           <Pressable style={styles.pressable}>
             <Button
-              title="עריכת פרטים אישיים"
+              title=" פרטי חניה"
               color="black"
               onPress={() =>
                 navigation.navigate("EditProfileD", {
@@ -193,7 +109,7 @@ export default ProfileDet = ({ route }) => {
           </Pressable>
           <Pressable style={styles.pressable}>
             <Button
-              title="צור קשר"
+              title="דוחות"
               color="black"
               onPress={() =>
                 navigation.navigate("ManageP", {
@@ -202,7 +118,109 @@ export default ProfileDet = ({ route }) => {
               }
             />
           </Pressable>
+          <Pressable style={styles.pressable}>
+            <Button
+              title="צור קשר"
+              color="black"
+              onPress={() => console.log("try")}
+            />
+          </Pressable>
+        </>
+      );
+    } else {
+      return (
+        <Pressable style={styles.pressable}>
+          <Button
+            title="בקשה לפרסום חניה"
+            color="black"
+            onPress={() => navigation.navigate("AddParking")}
+          />
+        </Pressable>
+      );
+    }
+  };
+
+  const parkingNotAllow = <Text style={{fontSize:14, color:'#bfbfbf'}}>חניה לא זמינה כרגע , ממתינה לאישור המנהלים</Text>
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <Pressable onPress={handleImagePress}>
+            <Image
+              style={styles.avatar}
+              source={{
+                uri: selectedImage,
+              }}
+            />
+          </Pressable>
+          <Text style={styles.username}>
+            {userDet ? userDet.ownerName : ""}
+          </Text>
+          {userDet && userDet.isConfirm === false && parkingNotAllow}
         </View>
+
+        <Modal visible={showOptions} animationType="slide" transparent>
+          <View style={styles.modalContainer}>
+            <Pressable
+              style={styles.optionButton}
+              onPress={() =>
+                handleOptionSelect(
+                  "option1",
+                  "https://bootdey.com/img/Content/avatar/avatar1.png"
+                )
+              }
+            >
+              <Image
+                style={styles.optionImage}
+                source={{
+                  uri: "https://bootdey.com/img/Content/avatar/avatar1.png",
+                }}
+              />
+            </Pressable>
+            <Pressable
+              style={styles.optionButton}
+              onPress={() =>
+                handleOptionSelect(
+                  "option2",
+                  "https://bootdey.com/img/Content/avatar/avatar2.png"
+                )
+              }
+            >
+              <Image
+                style={styles.optionImage}
+                source={{
+                  uri: "https://bootdey.com/img/Content/avatar/avatar2.png",
+                }}
+              />
+            </Pressable>
+            <Pressable
+              style={styles.optionButton}
+              onPress={() =>
+                handleOptionSelect(
+                  "option3",
+                  "https://bootdey.com/img/Content/avatar/avatar3.png"
+                )
+              }
+            >
+              <Image
+                style={styles.optionImage}
+                source={{
+                  uri: "https://bootdey.com/img/Content/avatar/avatar3.png",
+                }}
+              />
+            </Pressable>
+            <Button
+              title="ביטול"
+              onPress={() => setShowOptions(false)}
+              color="white"
+            />
+          </View>
+        </Modal>
+      </View>
+
+      <View style={styles.body}>
+        <View style={styles.btnCont}>{renderButtons()}</View>
       </View>
     </View>
   );
@@ -258,7 +276,6 @@ const styles = StyleSheet.create({
     marginTop: 36,
     shadowColor: "white",
     shadowOffset: { width: 2, height: 4 },
-    // shadowOpacity: 0.2,
     shadowRadius: 6,
   },
   pressable: {
@@ -270,12 +287,11 @@ const styles = StyleSheet.create({
     backgroundColor: "lightblue",
   },
 
-
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   optionButton: {
     marginBottom: 10,

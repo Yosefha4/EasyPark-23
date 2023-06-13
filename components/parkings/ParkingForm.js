@@ -1,28 +1,50 @@
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Colors } from "../../constants/styles";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
 import Button from "../ui/Button";
-import { useNavigation } from "@react-navigation/native";
 import { Alert } from "react-native";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { AuthContext } from "../../store/contextAuth";
 
-const ParkingForm = ({ onCreateParking }) => {
-  const navigation = useNavigation();
+const ParkingForm = () => {
   const [pickedImage, setPickedImage] = useState();
   const [pickedLocation, setPicketLocation] = useState();
 
-  const [enterTitle, setEnterTitle] = useState("");
   const [enterAddress, setEnterAddress] = useState("");
   const [enterPrice, setEnterPrice] = useState("");
   const [enterDescription, setEnterDescription] = useState("");
   const [enterOwnerId, setEnterOwnerId] = useState("");
   const [enterOwnerName, setEnterOwnerName] = useState("");
+  const [enterEmail, setEnterEmail] = useState("");
+  const [userTokenEn, setUserTokemEn] = useState("");
+  const [tempCount, setTempCount] = useState(0);
 
   const { token, isAuthenticated } = useContext(AuthContext);
+
+  useEffect(()=>{
+    funcToReturnID(enterEmail);
+    takeLocationHandler();
+  },[enterEmail,tempCount,pickedLocation])
+
+  const updateStateRepeatedly = (times) => {
+    let counter = 0;
+    const intervalId = setInterval(() => {
+      setTempCount((prevCount) => prevCount + 1);
+      counter++;
+
+      if (counter === times) {
+        clearInterval(intervalId);
+      }
+    }, 3000);
+  };
+
+  useEffect(() => {
+    updateStateRepeatedly(4);
+  }, []);
+
 
   async function addParking() {
     try {
@@ -32,12 +54,14 @@ const ParkingForm = ({ onCreateParking }) => {
         description: enterDescription,
         imageUri: pickedImage,
         location: { lat: pickedLocation.lat, lng: pickedLocation.lng },
-        // location: pickedLocation.toString(),
-        parkingID: token,
+      
         ownerParkingId: enterOwnerId,
         ownerName: enterOwnerName,
+        ownerEmail:enterEmail,
+        parkingID:  (userTokenEn ? userTokenEn : "errorParkingID"),
+        // parkingID:  (enterEmail),
+        // parkingID: token,
         price: enterPrice,
-        // title: enterTitle,
         isConfirm: false,
       });
       Alert.alert("בקשת שיתוף החניה שלך נשלחה ! ", "ניצור איתך קשר בהקדם . ");
@@ -45,6 +69,26 @@ const ParkingForm = ({ onCreateParking }) => {
       console.log(error);
       Alert.alert("משהו השתבש...", " אנא נסה שוב מאוחר יותר או צור איתנו קשר ");
     }
+  }
+
+  async function funcToReturnID(enteredEmail) {
+    try {
+      const usersCollection = collection(db, 'users');
+      const queryRef = query(usersCollection, where('userEmail', '==', enteredEmail));
+      const querySnapshot = await getDocs(queryRef);
+  
+      if (!querySnapshot.empty) {
+        const userData = querySnapshot.docs[0].data();
+        const userId = userData.userToken; // Assuming the property is named 'id'
+        setUserTokemEn(userId)
+        console.log("userID:" , userTokenEn)
+        return userId;
+      }
+    } catch (error) {
+      console.log('Error:', error);
+    }
+  
+    return null; // Return null if the email doesn't exist or there was an error
   }
 
   function changeAddressHandler(enterText) {
@@ -64,6 +108,9 @@ const ParkingForm = ({ onCreateParking }) => {
   }
   function takeImageHandler(imageUri) {
     setPickedImage(imageUri);
+  }
+  function takeEmailHandler(enterText) {
+    setEnterEmail(enterText);
   }
 
   const takeLocationHandler = useCallback((location) => {
@@ -95,6 +142,14 @@ const ParkingForm = ({ onCreateParking }) => {
           style={styles.input}
           onChangeText={changeOwnerName}
           value={enterOwnerName}
+        />
+      </View>
+      <View>
+        <Text style={styles.label}>אימייל (תואם לבעל החשבון)</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={takeEmailHandler}
+          value={enterEmail}
         />
       </View>
       <View>
@@ -134,12 +189,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: "bold",
-    // marginBottom: 4,
     color: Colors.primary500,
     textAlign: "right",
   },
   input: {
-    // marginVertical: 8,
     paddingHorizontal: 4,
     paddingVertical: 8,
     fontSize: 16,

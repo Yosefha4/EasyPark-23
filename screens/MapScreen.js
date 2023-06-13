@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Button } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
+import { StyleSheet, Text, View, Button, Platform } from "react-native";
+import MapView, {
+  Marker,
+  Circle,
+  PROVIDER_GOOGLE,
+  PROVIDER_DEFAULT,
+} from "react-native-maps";
 import * as Location from "expo-location";
-// import Button from "../components/ui/Button";
-
-import PinImageMarker from "../assets/pinM.png";
 
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
+
 import ParkingDetails from "./ParkingDetails";
 import ParkingItem from "../components/parkings/ParkingItem";
 import { Alert } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
 
-const Tab = createBottomTabNavigator();
+import { FontAwesome } from "@expo/vector-icons";
 
-const MapScreen = ({route}) => {
+const MapScreen = ({ route }) => {
   const [parkingsMarkers, setParkingsMarkers] = useState([]);
   const [loadingParking, setLoadingParking] = useState(false);
   const [filterParkings, setFilterParkings] = useState([]);
 
   const navigation = useNavigation();
-
-
 
   // ********** //
   const [showRadiusCircle, setShowRadiusCircle] = useState(false);
@@ -81,19 +80,18 @@ const MapScreen = ({route}) => {
 
   const handleZoomIn = () => {
     let newRegion;
-    if(currentLocation){
-       newRegion = {
+    if (currentLocation) {
+      newRegion = {
         latitude: currentLocation.latitude,
-        longitude:currentLocation.longitude,
+        longitude: currentLocation.longitude,
         latitudeDelta: mapRegion.latitudeDelta / 2,
-        longitudeDelta: mapRegion.longitudeDelta / 2 ,
-      }
-    }
-    else{
-       newRegion = {
+        longitudeDelta: mapRegion.longitudeDelta / 2,
+      };
+    } else {
+      newRegion = {
         ...mapRegion,
         latitudeDelta: mapRegion.latitudeDelta / 2,
-        longitudeDelta: mapRegion.longitudeDelta / 2 ,
+        longitudeDelta: mapRegion.longitudeDelta / 2,
       };
     }
 
@@ -102,39 +100,31 @@ const MapScreen = ({route}) => {
 
   const handleZoomOut = () => {
     let newRegion;
-    if(currentLocation){
-       newRegion = {
+    if (currentLocation) {
+      newRegion = {
         latitude: currentLocation.latitude,
-        longitude:currentLocation.longitude,
+        longitude: currentLocation.longitude,
         latitudeDelta: mapRegion.latitudeDelta * 2,
-        longitudeDelta: mapRegion.longitudeDelta * 2 ,
-      }
-    }
-    else{
-       newRegion = {
+        longitudeDelta: mapRegion.longitudeDelta * 2,
+      };
+    } else {
+      newRegion = {
         ...mapRegion,
         latitudeDelta: mapRegion.latitudeDelta * 2,
-        longitudeDelta: mapRegion.longitudeDelta * 2 ,
+        longitudeDelta: mapRegion.longitudeDelta * 2,
       };
     }
     setMapRegion(newRegion);
   };
 
-  // const filterParkings = parkingsMarkers.filter((parking) => parking.isConfirm = true);
-
-  // console.log(filterParkings)
-
   return (
-    <View style={styles.cont}>
+    <View style={styles.cont} testID="map-view">
       <MapView
         region={mapRegion}
-        // region={{
-        //   latitude: currentLocation ? currentLocation.latitude : 31.771959,
-        //   longitude: currentLocation ? currentLocation.longitude : 35.217018,
-        //   latitudeDelta: 1.8524,
-        //   longitudeDelta: 0.4648,
-        // }}
-        provider={PROVIDER_GOOGLE}
+        provider={
+          Platform.OS === "android" ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
+        }
+        // provider={PROVIDER_GOOGLE}
         style={styles.map}
         showsUserLocation
       >
@@ -142,64 +132,51 @@ const MapScreen = ({route}) => {
           filterParkings.map((parking) => (
             <Marker
               onPress={() => {
-                navigation.navigate("Parkingdetails", { parking  })
-                
-              }
-              }
+                navigation.navigate("Parkingdetails", { parking });
+              }}
               key={parking.id}
               coordinate={{
                 latitude: parking.location.lat,
                 longitude: parking.location.lng,
               }}
-              title={parking.title}
+              title={parking.address}
               description={`${parking.price}₪ / שעה`}
+              testID={`parking-marker-${parking.id}`} // Add the testID prop here
             />
           ))}
-
-        {/* {showRadiusCircle && (
-          <Marker
-            key={currentLocation.latitude + Math.random(15)}
-            coordinate={{
-              latitude: currentLocation.latitude,
-              longitude: currentLocation.longitude,
-            }}
-            pinColor="blue"
-          />
-        )} */}
-
-        {showRadiusCircle && currentLocation && (
-          <Circle
-            center={{
-              latitude: currentLocation.latitude,
-              longitude: currentLocation.longitude,
-            }}
-            radius={20000}
-            strokeColor={"rgba(158, 158, 255, 1)"}
-            fillColor={"rgba(158, 158, 255, 0.3)"}
-            strokeWidth={2}
-          />
-        )}
-
-        <View style={styles.topContainer}>
-          <View style={styles.showBtn}>
-            <Button
-              title="הצג מיקום"
-              onPress={displayCircleOnMap}
-              color="black"
-            />
-          </View>
-       
-            <View style={styles.icons}>
-              <Icon name="plus-square-o" size={40} style={{marginRight:8}} onPress={handleZoomIn} />
-              <Icon name="minus-square-o" size={40} onPress={handleZoomOut} />
-            </View>
-
-            </View>
-
-       
       </MapView>
-      {/* <Icon /> */}
-      {/* <Button onPress={displayCircleOnMap}>Show My Location</Button> */}
+
+      {showRadiusCircle && currentLocation && (
+        <Circle
+          center={{
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+          }}
+          radius={20000}
+          strokeColor={"rgba(158, 158, 255, 1)"}
+          fillColor={"rgba(158, 158, 255, 0.3)"}
+          strokeWidth={2}
+          style={{ position: "absolute" }}
+        />
+      )}
+
+      <View style={styles.topContainer}>
+        <View style={styles.icons}>
+          <FontAwesome
+            name="plus-square-o"
+            size={40}
+            style={{ marginRight: 8 }}
+            onPress={handleZoomIn}
+            testID="zoomInBtn"
+          />
+          <FontAwesome
+            name="minus-square-o"
+            size={40}
+            onPress={handleZoomOut}
+            testID="zoomOutBtn"
+          />
+        </View>
+      </View>
     </View>
   );
 };
@@ -224,8 +201,6 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     position: "absolute",
 
-    // width:150,
-    // top:15,left:20,
     borderWidth: 1,
     borderColor: "black",
     alignItems: "center",
@@ -235,18 +210,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   topContainer: {
-    flexDirection: 'column',
-    
-    // alignItems: 'flex-start',
-    // justifyContent: 'space-between',
+    flexDirection: "column",
+    position: "absolute",
   },
-  icons:{
-    flexDirection: 'row',
-  //  marginTop:24,
-  //  padding:40,
-   paddingHorizontal:12,
-   paddingVertical:50
+  icons: {
+    flexDirection: "row",
 
-  }
-
+    paddingHorizontal: 12,
+    paddingVertical: 20,
+  },
 });

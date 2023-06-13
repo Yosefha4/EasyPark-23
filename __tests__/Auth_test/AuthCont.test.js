@@ -1,7 +1,7 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import AuthContent from "../components/Auth/AuthContent";
-import FlatButton from "../components/ui/FlatButton";
+import AuthContent from "../../components/Auth/AuthContent"
+import FlatButton from "../../components/ui/FlatButton";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { create, renderer } from "react-test-renderer";
 // import { createNativeStackNavigator } from "@react-navigation/native-stack";

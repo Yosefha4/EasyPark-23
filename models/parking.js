@@ -8,7 +8,8 @@ export class Parking {
     location,
     enterOwnerId,
     isConfirm,
-    ownerName
+    ownerName,
+    ownerEmail,
   ) {
 
     this.imageUri = imageUri;
@@ -19,6 +20,7 @@ export class Parking {
     this.ownerParkingId = enterOwnerId;
 
     this.ownerName = ownerName;
+    this.ownerEmail = ownerEmail;
     this.isConfirm = false;
 
     this.id = new Date().toString() + Math.random().toString();

@@ -112,7 +112,8 @@ exports[`WelcomeScreen should render correctly with mocked AuthContext 1`] = `
           }
         }
       >
-        המשך         
+        המשך
+         
       </Text>
     </View>
   </View>

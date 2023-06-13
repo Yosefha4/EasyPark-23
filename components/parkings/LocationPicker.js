@@ -5,22 +5,14 @@ import {
   PermissionStatus,
   useForegroundPermissions,
 } from "expo-location";
-import { Colors } from "../../constants/styles";
 import OutlinedButton from "../ui/OutlinedButton";
 import { useEffect, useState } from "react";
 
-import MapView, { Marker } from "react-native-maps";
-
 import { Text } from "react-native";
-import { useRoute } from "@react-navigation/native";
-
-import { getAddress } from "../../utils/auth";
 
 function LocationPicker({ onTakeLocation }) {
   const [currentLocation, setCurrentLocation] = useState([]);
   const [locationPermission, requestPermission] = useForegroundPermissions();
-
-  // const route = useRoute();
 
   useEffect(() => {
     onTakeLocation(currentLocation);
@@ -57,51 +49,22 @@ function LocationPicker({ onTakeLocation }) {
 
     setCurrentLocation({ lat: lat, lng: lng });
     console.log(currentLocation);
-
-    // setCurrentLocation( coordsXY.lat,coordsXY.lng)
-
-    // console.log(location);
-    // console.log(coordsXY);
-    // console.log("The Current Location is : " + lat , lng);
-
-  //   try {
-  //     if(location){
-  //     const convertedAddress =  await getAddress(lat,lng);
-  //     console.log(convertedAddress)
-  //     }
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  
   }
-  // console.log(currentLocation);
 
-  // const convertedAddress = getAddress(location.coords.latitude,location.coords.longitude);
-  // console.log(convertedAddress)
-
-  // function pickOnMapHandler() {}
   return (
     <View>
       <View style={styles.mapPreview}>
         {currentLocation.lat && (
           <View style={styles.map}>
-
             <Text>Your lat : {currentLocation.lat}</Text>
             <Text>Your lng : {currentLocation.lng}</Text>
           </View>
         )}
-
-        {/* {currentLocation && <>
-        <Text>Your Current Location is : {currentLocation} </Text>
-        </>} */}
       </View>
       <View>
         <OutlinedButton onPress={getLocationHandler} icon="location">
           שיתוף מיקום
         </OutlinedButton>
-        {/* <OutlinedButton onPress={pickOnMapHandler} icon="map">
-          Pick on Map
-        </OutlinedButton> */}
       </View>
     </View>
   );
@@ -116,9 +79,9 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 4,
-    position:'relative'
+    position: "relative",
   },
   actions: {
     width: "100%",
@@ -126,8 +89,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  map:{
-    flex:1
-    ,position:'absolute'
-  }
+  map: {
+    flex: 1,
+    position: "absolute",
+  },
 });

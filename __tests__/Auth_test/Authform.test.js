@@ -1,8 +1,9 @@
 import React from "react";
 import { create } from "react-test-renderer";
-import AuthForm from "../components/Auth/AuthForm";
-import Button from "../components/ui/Button";
-import Input from "../components/Auth/Input";
+import AuthForm from "../../components/Auth/AuthForm"
+
+import Button from "../../components/ui/Button";
+import Input from "../../components/Auth/Input";
 import { View } from "react-native";
 import { fireEvent, render } from "@testing-library/react-native";
 

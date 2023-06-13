@@ -1,23 +1,19 @@
 import { View, Image, Text, StyleSheet } from "react-native";
-// import Button from "../ui/Button";
 import {
   launchCameraAsync,
   useCameraPermissions,
   PermissionStatus,
 } from "expo-image-picker";
-import { Button } from "react-native";
 import { Alert } from "react-native";
-import { useEffect, useState } from "react";
-import { Colors } from "../../constants/styles";
+import { useState } from "react";
 import OutlinedButton from "../ui/OutlinedButton";
 
-import {ref,uploadBytes,getDownloadURL} from 'firebase/storage';
-import {storage} from '../../config/firebase' 
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../config/firebase";
 
 function ImagePicker({ onTakeImage }) {
   const [pickedImage, setPickedImage] = useState();
   const [cameraPermissionInfo, requestPermission] = useCameraPermissions();
-
 
   async function verifyPermission() {
     if (cameraPermissionInfo.status === PermissionStatus.UNDETERMINED) {
@@ -25,13 +21,29 @@ function ImagePicker({ onTakeImage }) {
       return permissionResponse.granted;
     }
     if (cameraPermissionInfo.status === PermissionStatus.DENIED) {
-      Alert.alert(
-        "Insufficient Permissions!",
-        "You need to grant camera permissions to use this app"
-      );
-      return false;
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Insufficient Permissions!",
+          "You need to grant camera permissions to use this app",
+          [
+            {
+              text: 'Deny',
+              style: 'cancel',
+              onPress: () => {
+                resolve(false);
+              },
+            },
+            {
+              text: 'Allow',
+              onPress: () => {
+                resolve(requestPermission().then((response) => response.granted));
+              },
+            },
+          ]
+        );
+      });
     }
-
+  
     return true;
   }
 
@@ -47,7 +59,6 @@ function ImagePicker({ onTakeImage }) {
       aspect: [16, 9],
       quality: 0.5,
     });
-    // console.log(image.assets[0].uri)
     if (image.canceled) {
       setPickedImage("");
       onTakeImage("");
@@ -94,7 +105,7 @@ function ImagePicker({ onTakeImage }) {
   }
 
   return (
-    <View>
+    <View testID="image-picker-component">
       <View style={style.imagePreview}>{imagePreview}</View>
       <OutlinedButton icon="camera" onPress={takeImageHandler}>
         צלם/העלה תמונה

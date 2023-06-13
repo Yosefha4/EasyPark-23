@@ -1,10 +1,12 @@
 import React from "react";
 import renderer from "react-test-renderer";
-import WelcomeScreen from "../screens/WelcomeScreen";
-import AuthContextProvider, { AuthContext } from "../store/contextAuth";
+import WelcomeScreen from "../../screens/WelcomeScreen"
+import AuthContextProvider, { AuthContext } from "../../store/contextAuth";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { View } from "react-native";
-import Button from "../components/ui/Button";
+import Button from "../../components/ui/Button";
+
+
 
 // import {welcImgTest} from '../assets/welcImg'
 
@@ -12,6 +14,15 @@ const mockToken = "1234abcd";
 
 jest.mock("@react-navigation/native", () => ({
   useNavigation: jest.fn(),
+}));
+
+
+jest.mock("expo-notifications", () => ({
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  getExpoPushTokenAsync: jest.fn().mockResolvedValue("mockedPushToken"),
+  setNotificationChannelAsync: jest.fn(),
+  setNotificationHandler: jest.fn(),
 }));
 
 describe("WelcomeScreen", () => {
