@@ -1,60 +1,132 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 
-import {  Alert, Image, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, View, Platform } from "react-native";
 import { AuthContext } from "../store/contextAuth";
 
-import Button from '../components/ui/Button';
-
+import Button from "../components/ui/Button";
 
 import welcImg from "../assets/imageWithoutBg.png";
 import { useNavigation } from "@react-navigation/native";
 
+import * as Notifications from "expo-notifications";
 
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../config/firebase";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 function WelcomeScreen() {
-  const [fetchMessage, setFetchMessage] = useState("");
+  const [currentPushToken, setCurrentPushToken] = useState("");
 
-  const navigation =  useNavigation()
-
+  const navigation = useNavigation();
 
   const authCtx = useContext(AuthContext);
   const token = authCtx.token;
+  // const currEmail = authCtx.token;
 
   // useEffect(() => {
-  //   async function fetchData() {
-  //     try {
-  //        await axios
-  //         .get(
-  //           "https://easypark-react-native-default-rtdb.firebaseio.com/message.json?auth=" +
-  //             token
-  //         )
-  //         .then((response) => {
-  //           setFetchMessage(response.data);
-  //         });
-  //     } catch (error) {
-  //       // Alert.alert("Something get wrong...")
-  //       console.log(error);
-  //       // console.log("error");
-  //     }
-  //   }
-
-  //   fetchData();
+  //   configurePushNoti();
   // }, []);
+
+  useEffect(() => {
+    async function callToConfig() {
+      await configurePushNoti();
+    }
+    callToConfig();
+  }, []);
+
+  async function configurePushNoti() {
+    const { status } = await Notifications.getPermissionsAsync();
+    let finalStatus = status;
+
+    if (finalStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      Alert.alert("Permission required!", "push Noti need permission");
+      return;
+    }
+    const pushToken = await Notifications.getExpoPushTokenAsync();
+    // console.log(pushToken);
+    setCurrentPushToken(pushToken);
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.DEFAULT,
+      });
+    }
+  }
+
+  async function addUserTokenDoc(userEmail, userToken) {
+    try {
+      const userNtoken = collection(db, "users");
+      await addDoc(userNtoken, {
+        userEmail: userEmail,
+        userToken: token,
+      });
+      Alert.alert("משתמש נוצר בהצלחה!");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("משהו השתבש...", " אנא נסה שוב מאוחר יותר או צור איתנו קשר ");
+    }
+  }
+
+  async function saveNotificationToken() {
+    try {
+      const notifications = collection(db, "pushNotif");
+
+      const querySnapshot = await getDocs(
+        query(notifications, where("userIDToken", "==", token))
+      );
+
+      if (querySnapshot.empty) {
+        // await configurePushNoti();
+        await addDoc(notifications, {
+          userIDToken: token,
+          pushToken: currentPushToken ? currentPushToken : "Undefined..",
+        });
+        Alert.alert("ה-Push Token נשמר בהצלחה !");
+      } else {
+        console.log("The token already exist ...");
+      }
+    } catch (error) {
+      console.log(error);
+      Alert.alert("משהו השתבש...", " אנא נסה שוב מאוחר יותר או צור איתנו קשר ");
+    }
+  }
+
+
+
+  console.log("TOKEN : " , token)
 
   return (
     <View style={styles.rootContainer}>
-      <Text testID="welcTestText" style={styles.title}>ברוכים הבאים !</Text>
+      <Text testID="welcTestText" style={styles.title}>
+        ברוכים הבאים !
+      </Text>
 
       <View style={styles.image_container}>
         <Image style={styles.image} source={welcImg} testID="welcomeImage" />
       </View>
 
-      <Button testID='welcomeButton' onPress={()=> {
-        navigation.navigate('Personal', {token})
-        console.log("The token is : "+token)
-        } }  >המשך         </Button>
-
+      <Button
+        testID="welcomeButton"
+        onPress={() => {
+          saveNotificationToken();
+          navigation.navigate("Personal", { token });
+        }}
+      >
+        המשך{" "}
+      </Button>
     </View>
   );
 }
@@ -70,7 +142,6 @@ const styles = StyleSheet.create({
   },
   image_container: {
     flex: 1,
-    // position: "relative",
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
@@ -78,7 +149,6 @@ const styles = StyleSheet.create({
   },
   image: {
     position: "absolute",
-    // marginBottom: 0,
     width: "100%",
     height: "80%",
     zIndex: -1,

@@ -1,6 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
-import { collection, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { Pressable } from "react-native";
 import { Alert } from "react-native";
@@ -10,19 +19,34 @@ import { useNavigation } from "@react-navigation/native";
 
 const ClockTimerCount = ({ parking }) => {
   const [rentDays, setRentDays] = useState([]);
+  const [CurrentPush, setCurrentPush] = useState([]);
+  const [CurrentElement, setCurrentElement] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(0);
 
-  const { token, isAuthenticated } = useContext(AuthContext);
+  const { token, uuidToken } = useContext(AuthContext);
 
   const navigation = useNavigation();
 
-  // const [isMatchId, setIsMatchId] = useState(false)
-  // const [fromHour,setFromHour] = useState('')
-  // const [untilHour,setUntilHour] = useState('')
+  const updateStateRepeatedly = (times) => {
+    let counter = 0;
+    const intervalId = setInterval(() => {
+      setDataLoaded((prevCount) => prevCount + 1);
+      counter++;
+
+      if (counter === times) {
+        clearInterval(intervalId);
+      }
+    }, 3000);
+  };
+
+  useEffect(() => {
+    updateStateRepeatedly(4);
+  }, []);
 
   let currentSpotOwnerId = "";
-  let tempArray = "";
   let isMatchId = false;
   let matchArrayList = [];
+  let parkingIdForPush = parking ? parking.parkingID : "";
 
   useEffect(() => {
     const parkingQuery = collection(db, "availableDates");
@@ -42,44 +66,62 @@ const ClockTimerCount = ({ parking }) => {
     console.log(error);
   }
 
-  console.log(currentSpotOwnerId);
-  // console.log(new Date().getTime());
-  // console.log(new Date().getMonth())
-
   rentDays.map((item) => {
+    const curretnDate = new Date();
+    const formattedDate = `${curretnDate.getUTCDate()}/${
+      curretnDate.getUTCMonth() + 1
+    }/${curretnDate.getUTCFullYear()}`;
+    const isoDate2 = new Date(
+      formattedDate.split("/").reverse().join("-")
+    ).toISOString();
+    const isoDate1 = new Date(
+      item.availDays.whichDay.split("/").reverse().join("-")
+    ).toISOString();
+
     if (item.matchOwnerId === parking.parkingID) {
+      //update the function to return just the available dates
+
       matchArrayList.push(item);
-      console.log("Matchhhhhhhhhhh")
       isMatchId = true;
     } else {
       return;
     }
   });
 
-  // console.log("the rent days array length is : " + rentDays.length)
+  // rentDays.map((item) => {
+  //   if (item.matchOwnerId === parking.parkingID) {
+  //     matchArrayList.push(item);
+  //     console.log("Matchhhhhhhhhhh")
+  //     isMatchId = true;
+  //   } else {
+  //     return;
+  //   }
+  // });
 
-  const updateIsBusyFlag = async (itemId) => {
-    try {
-      const itemRef = doc(db, "availableDates", itemId);
+  // const updateIsBusyFlag = async (itemId) => {
+  //   // getPushToken();
+  //   try {
+  //     const itemRef = doc(db, "availableDates", itemId);
 
-      const itemSnapshot = await getDoc(itemRef);
-      const isBusy = itemSnapshot.data().isBusy;
+  //     const itemSnapshot = await getDoc(itemRef);
+  //     const isBusy = itemSnapshot.data().isBusy;
 
-      console.log(isBusy)
+  //     console.log(isBusy);
 
-      if(isBusy === true){
-        Alert.alert("חניה זו כבר תפוסה ...");
-        return;
-      }
+  //     if (isBusy === true) {
+  //       Alert.alert("חניה זו כבר תפוסה ...");
+  //       return;
+  //     }
 
-      await updateDoc(itemRef, { isBusy: true });
-      console.log("the token is " + token);
-      await updateDoc(itemRef, { rentBy: token });
-      console.log("isBusy field updated successfully!");
-    } catch (error) {
-      console.error("Error updating isBusy field:", error);
-    }
-  };
+  //     await updateDoc(itemRef, { isBusy: true });
+  //     console.log("the token is " + token);
+  //     await updateDoc(itemRef, { rentBy: token });
+  //     console.log("isBusy field updated successfully!");
+  //     sendPushNotificationHandler();
+  //   } catch (error) {
+  //     console.error("Error updating isBusy field:", error);
+  //   }
+  // };
 
   const handleDoubleCheck = (item) => {
     Alert.alert("מעוניינ/ת להזמין את החניה ? ", "למעבר אל דף התשלום", [
@@ -91,19 +133,104 @@ const ClockTimerCount = ({ parking }) => {
       },
       {
         text: "אישור",
-        onPress: () => updateIsBusyFlag(item.id),
-        // onPress: () => navigation.navigate("Paypal", { item, token, parking }),
+        // onPress: () => updateIsBusyFlag(item.id),
+        onPress: () => {
+          navigation.navigate("Paypal", {
+            item,
+            token,
+            parking,
+            CurrentElement,
+          });
+        },
         style: "cancel",
       },
     ]);
   };
 
-  console.log(matchArrayList);
-
   const daysTemp = <Text style={{ fontWeight: "bold" }}>יום:</Text>;
   const hoursTemp = <Text style={{ fontWeight: "bold" }}>שעות:</Text>;
 
-  // const handleAvailStyle =
+  const getPushToken = async () => {
+    const notifications = collection(db, "pushNotif");
+
+    onSnapshot(notifications, async (snap) => {
+      let parkingList = [];
+      snap.docs.forEach((doc) => {
+        const data = doc.data();
+        parkingList.push({ ...data, id: doc.id });
+      });
+
+      setCurrentPush(parkingList);
+    });
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPushToken();
+      await saveTheToken();
+    };
+
+    fetchData();
+  }, [CurrentElement, dataLoaded]);
+
+  const updateCurrentElement = async () => {
+    let isElementSet = false;
+
+    while (!isElementSet) {
+      try {
+        for (const item of CurrentPush) {
+          if (item.userIDToken === parkingIdForPush) {
+            setCurrentElement(item.pushToken.data);
+            isElementSet = true;
+            console.log("ELEMENT UPDATEEEE!!!!!");
+            break; // Exit the loop after updating the state
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+
+      // Wait for a brief moment before the next iteration
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  };
+
+  useEffect(() => {
+    updateCurrentElement();
+  }, [CurrentElement]);
+
+  async function saveTheToken() {
+    try {
+      for (const item of CurrentPush) {
+        if (item.userIDToken === parkingIdForPush) {
+          setCurrentElement(item.pushToken.data);
+          // console.log(CurrentElement);
+          return; // Exit the loop after updating the state
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function sendPushNotificationHandler() {
+    fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // to: "ExponentPushToken[***]",
+        to: `${CurrentElement}`,
+        title: "עדכון מ - EasyPark",
+        body: "מישהו השכיר את החניה שלך !",
+        sound: "default", // Specify the sound for the notification
+      }),
+    });
+  }
+
+  console.log(CurrentElement);
+  console.log(CurrentPush);
 
   return (
     <View style={styles.container}>
@@ -113,14 +240,16 @@ const ClockTimerCount = ({ parking }) => {
 
       {isMatchId ? (
         <View>
-          {/* <Text>we have available date !</Text> */}
-
           {matchArrayList.map((item) => (
             <View
               key={new Date() + Math.random().toString()}
               style={item.isBusy ? styles.busyTimes : styles.availableTimes}
             >
-              <Pressable onPress={() => handleDoubleCheck(item)}>
+              <Pressable
+                onPress={() => {CurrentElement ? 
+                  handleDoubleCheck(item) : Alert.alert("wait fot the push token update correctly!")
+                }}
+              >
                 <Text style={{ textAlign: "center" }}>
                   {daysTemp} {item.availDays.whichDay}
                 </Text>
@@ -137,21 +266,6 @@ const ClockTimerCount = ({ parking }) => {
           מצטערים ... חניה זו אינה זמינה כרגע{" "}
         </Text>
       )}
-
-      {/* <Text>{rentDays}</Text> */}
-
-      {/* <View style={styles.days}>
-      {rentDays.map((day) => (
-        <Text id={new Date().toString() + Math.random().toString()}>{day}</Text>
-      ))}
-      </View> */}
-
-      {/* <Text>{pubDay}</Text>
-      <Text>{fromHour}</Text>
-      <Text>{untilHour}</Text> */}
-
-      {/* <Text>{parking.reserveTime.daysForRent}</Text>
-      <Text>{parking.reserveTime.hoursForRent[0]}</Text> */}
     </View>
   );
 };

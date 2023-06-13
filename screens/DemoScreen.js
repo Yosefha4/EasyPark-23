@@ -1,15 +1,13 @@
-import { Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import ParkingList from "../components/parkings/ParkingList";
 
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { FlatList } from "react-native";
 import ParkingItem from "../components/parkings/ParkingItem";
 import Button from "../components/ui/Button";
-// import { useIsFocused } from "@react-navigation/native";
 
-const DemoScreen = ({ route }) => {
+const DemoScreen = () => {
   const [loadParkings, setLoadParkings] = useState([]);
   const [isLoad, setIsLoad] = useState(false);
 
@@ -25,7 +23,12 @@ const DemoScreen = ({ route }) => {
     const parkingQuery = collection(db, "parkings");
     onSnapshot(parkingQuery, (snap) => {
       let parkingList = [];
-      snap.docs.map((doc) => parkingList.push({ ...doc.data(), id: doc.id }));
+      snap.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.isConfirm === true) {
+          parkingList.push({ ...data, id: doc.id });
+        }
+      });
       setLoadParkings(parkingList);
 
       filterAllowsParkings();
@@ -45,7 +48,7 @@ const DemoScreen = ({ route }) => {
     setIsFilter(true);
     let filterParkings = [];
     filterParkings = loadParkings.filter((parking) =>
-      parking.title.includes(searchQuery)
+      parking.address.includes(searchQuery)
     );
     setFilteredParkings(filterParkings);
   };
@@ -67,13 +70,15 @@ const DemoScreen = ({ route }) => {
         <Button onPress={modifySearchParkings}>חפש</Button>
         <TextInput
           style={styles.searchInput}
-          placeholder="  חיפוש לפי עיר"
+          placeholder="  חיפוש חופשי"
           onChangeText={handleSearchQuery}
           value={searchQuery}
+          testID="searchBar"
         />
       </View>
       {!isFilter ? (
         <FlatList
+          testID="FlatList"
           data={allowsParkings}
           renderItem={({ item, index }) => {
             if (!allowsParkings || allowsParkings.length === 0) {
@@ -106,9 +111,6 @@ const DemoScreen = ({ route }) => {
         />
       )}
     </View>
-    // <View style={styles.cont}>
-    //   <ParkingList parkings={loadParkings} />
-    // </View>
   );
 };
 
@@ -122,13 +124,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     color: "black",
     marginTop: 24,
-    // position:'relative'
   },
   flatList: {},
   item: {
     display: "flex",
     width: "100%",
-    // backgroundColor: "#f9c2ff",
     padding: 32,
     marginVertical: 8,
     marginHorizontal: 16,
@@ -140,7 +140,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingLeft: 10,
-    // marginBottom: 30,
     marginLeft: 15,
     textAlign: "right",
   },
@@ -153,5 +152,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     textAlign: "center",
     alignItems: "center",
+
+    
   },
 });

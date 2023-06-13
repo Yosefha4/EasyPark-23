@@ -2,14 +2,11 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  TextInput,
   View,
   TouchableOpacity,
 } from "react-native";
 import React, { useContext, useState, useEffect } from "react";
 import { Colors } from "react-native/Libraries/NewAppScreen";
-
-import { Calendar, LocaleConfig } from "react-native-calendars";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Button from "../components/ui/Button";
@@ -35,6 +32,7 @@ const EditParkingDetails = () => {
 
   //add availableDays section
   const [availableDays, setAvailableDays] = useState([]);
+  const [sortedArray, setSortedArray] = useState([]);
 
   useEffect(() => {
     // Fetch the current available days from the database and update the state
@@ -59,11 +57,24 @@ const EditParkingDetails = () => {
     fetchAvailableDays();
   }, []);
 
-  const currentDate = new Date().toLocaleDateString();
+  useEffect(() => {
+    if (availableDays) {
+      const sortedArr = sortArrayByMonth(availableDays);
+      setSortedArray(sortedArr);
+
+    }
+  }, []);
+
+  const sortArrayByMonth = (arr) => {
+    arr.sort((a, b) => {
+      const datePartsA = a.availDays.whichDay.split("/")[1];
+      const datePartsB = b.availDays.whichDay.split("/")[1];
+      return datePartsA - datePartsB;
+    });
+    return arr;
+  };
 
   const { token, isAuthenticated } = useContext(AuthContext);
-
-  // console.log(currentDate)
 
   const updateParkingTime = () => {
     Alert.alert("Update Successfully!", `the until time is :${untilTime}`);
@@ -137,8 +148,6 @@ const EditParkingDetails = () => {
 
   const deleteAvailableDay = async (id) => {
     try {
-      console.log("Deleting document with ID:", id);
-
       // Perform the necessary action to delete the item from the database
       await deleteDoc(doc(db, "availableDates", id));
       Alert.alert("Success", "Available day deleted successfully");
@@ -194,12 +203,29 @@ const EditParkingDetails = () => {
           </View>
         </View>
         <View style={styles.btn}>
-          <Button onPress={addAvailableTimes}>עדכן</Button>
+          <Button
+            onPress={() => {
+              Alert.alert(
+                "מעוניין לפרסם את הזמן ? ",
+                "הזמנים שבחרת יתווספו לרשימת הזמנים הפנויים ויהיו זמינים להשכרה",
+                [
+                  {
+                    text: "אישור",
+                    onPress: () => addAvailableTimes(),
+                    style: "cancel",
+                  },
+                  { text: "ביטול" },
+                ]
+              );
+            }}
+          >
+            עדכן
+          </Button>
         </View>
       </View>
       <Text style={styles.sectionTitle}>ימים זמינים נוכחיים:</Text>
       <FlatList
-        data={availableDays}
+        data={sortedArray.length > 0 ? sortedArray : availableDays}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>

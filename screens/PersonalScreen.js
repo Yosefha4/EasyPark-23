@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import WelcomeScreen from "./WelcomeScreen";
 import DemoScreen from "./DemoScreen";
 
-import { NavigationContainer } from "@react-navigation/native";
-import AddParking from "./AddParking";
+
 import MapScreen from "./MapScreen";
-import EditParkingDetails from "./EditParkingDetails";
 import { Colors } from "../constants/styles";
 
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -16,7 +13,6 @@ import ProfileDet from "./ProfileDet";
 
 const Tab = createBottomTabNavigator();
 
-const mapIcon = <Icon size={24} color="white" name="star" />;
 
 const BottomNavBar = (token) => {
   const [userToken, setUserToken] = useState("");
@@ -29,7 +25,6 @@ const BottomNavBar = (token) => {
     }
   }, []);
 
-  // console.log(token)
   return (
     <Tab.Navigator
       screenOptions={{
@@ -37,12 +32,6 @@ const BottomNavBar = (token) => {
         tabBarActiveBackgroundColor: Colors.primary200,
       }}
     >
-      <Tab.Screen
-        name="איזור אישי"
-        component={ProfileDet}
-        initialParams={{ currentUser: token }}
-        options={{ tabBarIcon: () => <Icons name="person" size={24} /> }}
-      />
       <Tab.Screen
         name="מפה"
         component={MapScreen}
@@ -55,8 +44,13 @@ const BottomNavBar = (token) => {
         component={DemoScreen}
         options={{ tabBarIcon: () => <Icons name="search" size={24} /> }}
       />
-      {/* <Tab.Screen name="AddParking" component={AddParking} />
-      <Tab.Screen name="EditParking" component={EditParkingDetails} /> */}
+
+      <Tab.Screen
+        name="איזור אישי"
+        component={ProfileDet}
+        initialParams={{ currentUser: token }}
+        options={{ tabBarIcon: () => <Icons name="person" size={24} /> }}
+      />
     </Tab.Navigator>
   );
 };

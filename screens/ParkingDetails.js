@@ -1,36 +1,25 @@
 import {
-  Alert,
   Image,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  Linking,
+  TouchableOpacity,
+  Modal,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import Button from "../components/ui/Button";
-import ClockTimerCount from "../components/parkings/ClockTimerCount";
 
-import MapView, { Marker, Polyline } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
-import * as Location from "expo-location";
+import ClockTimerCount from "../components/parkings/ClockTimerCount";
 
 const ParkingDetails = ({ route, navigation }) => {
   const { parking } = route.params;
 
-  // const [currentLocation, setCurrentLocation] = useState(null);
-  // const [routeCoordinates, setRouteCoordinates] = useState([]);
-  // const [showNavigationMap, setShowNavigationMap] = useState(false);
+  const [isVisableModal, setIsVisableModal] = useState(false);
 
-  // const handleNavigation = () => {
-  //   const { latitude, longitude } = parking.location;
-  //   const destination = `${latitude},${longitude}`;
-  //   const url = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-  //   Linking.openURL(url);
-  // };
+  const handleImageModal = () => {
+    setIsVisableModal(!isVisableModal);
+  };
 
-  // console.log(thisparking)
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
@@ -40,13 +29,27 @@ const ParkingDetails = ({ route, navigation }) => {
 
         <ClockTimerCount parking={parking} />
 
-        <Image
-          source={{ uri: parking.imageUri }}
-          style={{ width: 200, height: 200, marginTop: 40 }}
-        />
-        <View style={{ marginTop: 30 }}>
-          {/* <Button children="Nav" onPress={handleNavigation} /> */}
-        </View>
+        <TouchableOpacity onPress={handleImageModal} testID="parking-image">
+          <Image
+            source={{ uri: parking.imageUri }}
+            style={{ width: 200, height: 200, marginTop: 40 }}
+          />
+        </TouchableOpacity>
+
+        <Modal visible={isVisableModal} transparent={true} testID="modal">
+          <View style={styles.modalContainer}>
+            <Image
+              source={{ uri: parking.imageUri }}
+              style={styles.modalImage}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleImageModal}
+            >
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </View>
     </ScrollView>
   );
@@ -59,33 +62,22 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
+
+    backgroundColor: "#f8f8f8",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 16,
-    backgroundColor: "#ffff",
+    //
     color: "black",
     shadowColor: "#171717",
     shadowOffset: { width: -2, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-  //   container:{
-  //     flex:1,
-  //     gap:4,
-  //     padding: 20,
-  //     width:250,
 
-  //     // justifyContent:'center',
-  //     marginVertical: 8,
-  //     marginHorizontal: 16,
-  //     backgroundColor:"#ffff",
-  //     color:'black',
-  //     shadowColor: '#171717',
-  //     shadowOffset: {width: -2, height: 4},
-  //     shadowOpacity: 0.2,
-  //     shadowRadius: 3,
-
-  // },
   title: {
     fontWeight: "bold",
     fontSize: 18,
@@ -93,18 +85,21 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   address: {
-    textAlign: "center",
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "bold",
     marginTop: 16,
+    marginBottom: 8,
+    textAlign: "center",
   },
   price: {
-    fontWeight: "bold",
     width: 120,
-    color: "black", // Update to a vibrant color of your choice
-    marginTop: 14,
-    marginBottom: 24,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 8,
+    marginBottom: 16,
     textAlign: "center",
+
     borderWidth: 1,
     borderColor: "black",
     shadowColor: "lightblue", // Match the text color
@@ -121,5 +116,39 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    marginTop: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    resizeMode: "cover",
+  },
+  modalContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  modalImage: {
+    width: 300,
+    height: 300,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#000",
+    fontWeight: "bold",
   },
 });

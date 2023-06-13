@@ -1,28 +1,33 @@
 {
   "expo": {
-    "name": "CrazyApp",
-    "slug": "CrazyApp",
+    "name": "EasyPark",
+    "slug": "EasyPark",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo-color.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/imageWithoutBg.png",
+      "image": "./assets/logo-color.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/imageWithoutBg.png",
+        "foregroundImage": "./assets/logo-color.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo-color.png"
     },
     "plugins": [
       [
@@ -30,7 +35,15 @@
         {
           "cameraPermission": "The app needs access to your camera in order to take photos of your car parking ."
         }
+   
       ]
-    ]
+    
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "85c43dae-18c7-4231-adac-e2f3828f53c2"
+      }
+    },
+    "owner": "yosefha"
   }
 }
