@@ -6,12 +6,13 @@ import {
   View,
   TouchableOpacity,
   Modal,
+  Linking,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
 import ClockTimerCount from "../components/parkings/ClockTimerCount";
 
-const ParkingDetails = ({ route, navigation }) => {
+const ParkingDetails = ({ route }) => {
   const { parking } = route.params;
 
   const [isVisableModal, setIsVisableModal] = useState(false);
@@ -19,6 +20,28 @@ const ParkingDetails = ({ route, navigation }) => {
   const handleImageModal = () => {
     setIsVisableModal(!isVisableModal);
   };
+
+  const navigateToParkingLocation = () => {
+    if(parking.location){
+      const lat = parking.location.lat; 
+      const lon = parking.location.lng; 
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  
+      try {
+        Linking.openURL(url);
+  
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    else{
+      console.log("error with found location")
+    }
+
+
+  };
+
+  console.log(parking.location.lat)
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -34,6 +57,10 @@ const ParkingDetails = ({ route, navigation }) => {
             source={{ uri: parking.imageUri }}
             style={{ width: 200, height: 200, marginTop: 40 }}
           />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={navigateToParkingLocation} style={styles.navigationButton}>
+          <Text style={styles.navigationButtonText}>ניווט אל החניה</Text>
         </TouchableOpacity>
 
         <Modal visible={isVisableModal} transparent={true} testID="modal">
@@ -150,5 +177,17 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#000",
     fontWeight: "bold",
+  },
+  navigationButton: {
+    backgroundColor: "#6495ED",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  navigationButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

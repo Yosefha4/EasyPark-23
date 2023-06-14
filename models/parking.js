@@ -10,6 +10,7 @@ export class Parking {
     isConfirm,
     ownerName,
     ownerEmail,
+    parkingID
   ) {
 
     this.imageUri = imageUri;
@@ -24,7 +25,7 @@ export class Parking {
     this.isConfirm = false;
 
     this.id = new Date().toString() + Math.random().toString();
-
+    this.parkingID = parkingID;
     // Add flag to check parking requests .
   }
 }

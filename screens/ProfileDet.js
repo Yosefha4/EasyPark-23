@@ -11,14 +11,28 @@ import {
 } from "react-native";
 import { Colors } from "../constants/styles";
 import { AuthContext } from "../store/contextAuth";
-import { collection, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import { Alert } from "react-native";
+import EmailContext from "../store/emailContext";
+import { async } from "@firebase/util";
 
 export default ProfileDet = () => {
   const navigation = useNavigation();
 
   const { token, isAuthenticated } = useContext(AuthContext);
+
+  //Get email from Context API
+  const emailContext = useContext(EmailContext);
+  const email = emailContext.email;
+
+  const [currentUuidTkn, setCurrentUuidTkn] = useState(null);
 
   const [currentDetails, setCurrentDetails] = useState([]);
   const [userDet, setUserDet] = useState([]);
@@ -28,6 +42,48 @@ export default ProfileDet = () => {
   const [selectedImage, setSelectedImage] = useState(
     "https://bootdey.com/img/Content/avatar/avatar3.png"
   );
+
+  const [tempCount, setTempCount] = useState(false);
+  const [counterNumber, setCounterNumber] = useState(0);
+
+  useEffect(() => {
+    // Fetch the current available days from the database and update the state
+    const fetchAvailableDays = async () => {
+      try {
+        const matchUuidToken = collection(db, "users");
+
+        const q = query(matchUuidToken, where("userEmail", "==", email)); // Filter by matchOwnerId
+        const querySnapshot = await getDocs(q);
+        const availableDaysData = querySnapshot.docs.map((doc) => doc.data());
+
+        setCurrentUuidTkn(availableDaysData);
+        updateFlag();
+      } catch (error) {
+        console.log("error, error", error);
+      }
+    };
+
+    fetchAvailableDays();
+  }, [currentDetails, counterNumber]);
+
+  const updateStateRepeatedly = (times) => {
+    let counter = 0;
+    const intervalId = setInterval(() => {
+      setCounterNumber((prevCount) => prevCount + 1);
+      counter++;
+
+      if (counter === times) {
+        clearInterval(intervalId);
+      }
+    }, 3000);
+  };
+
+  useEffect(() => {
+    updateStateRepeatedly(3);
+  }, []);
+
+  // console.log("currentUuidTkn, ", currentUuidTkn);
+  // console.log("email, ", email);
 
   const handleImagePress = () => {
     setShowOptions(true);
@@ -54,33 +110,69 @@ export default ProfileDet = () => {
   }, []);
 
   useEffect(() => {
-    if (currentDetails) {
+    if (currentDetails && currentUuidTkn) {
       currentDetails.forEach((item) => {
-        if (item.parkingID === token) {
+        if (item.parkingID === currentUuidTkn[0].userToken) {
           setUserDet(item);
         }
       });
     }
-  }, [currentDetails]);
+  }, [currentDetails, currentUuidTkn]);
 
-  const isUserParkingOwner = currentDetails.some(
-    (detail) => detail.parkingID === token
-  );
+  // let isUserParkingOwner = false;
 
-  const userEmail = userDet ?  userDet.ownerEmail: "id"
+  // async function updateFlad() {
+  //   isUserParkingOwner = currentUuidTkn
+  //     ? currentDetails.some(
+  //         (detail) => detail.parkingID === currentUuidTkn[0].userToken
+  //       )
+  //     : false;
+  // }
 
-  console.log(userEmail)
+  async function updateFlag() {
+    // isUserParkingOwner = false;
+    // console.log("currentUuidTkn               ", currentUuidTkn);
+    if (currentUuidTkn && currentUuidTkn.length > 0) {
+      currentDetails.forEach((detail) => {
+        // console.log(tempCount);
+        // console.log(currentUuidTkn[0].userToken);
+        // console.log(detail.parkingID);
+        if (detail.parkingID === currentUuidTkn[0].userToken) {
+          // isUserParkingOwner = true;
+          setTempCount(true);
+          // console.log("match");
+          return;
+        }
+      });
+    }
+  }
 
+  //7bdf2839-d98f-445d-a3f1-480a6775de7f
+  //7bdf2839-d98f-445d-a3f1-480a6775de7f
+
+  // const userEmail = userDet ?  userDet.ownerEmail: "id"
+
+  // console.log(currentUuidTkn[0].userToken);
+  // console.log(currentDetails[0].parkingID);
+  // console.log(isUserParkingOwner);
+
+  // console.log(currentUuidTkn[0].userToken === currentDetails[0].parkingID)
 
   const renderButtons = () => {
-    if (isUserParkingOwner) {
+    // console.log("The ISUOWNERpARKING : ", tempCount);
+    if (tempCount) {
       return (
         <>
           <Pressable style={styles.pressable}>
             <Button
               title="בקשה לפרסום חניה"
               color="black"
-              onPress={() =>Alert.alert("כבר יש ברשותך חניה","לא ניתן לשלב מספר חניות למשתמש...")}
+              onPress={() =>
+                Alert.alert(
+                  "כבר יש ברשותך חניה",
+                  "לא ניתן לשלב מספר חניות למשתמש..."
+                )
+              }
               // onPress={() => navigation.navigate("AddParking")}
             />
           </Pressable>
@@ -88,11 +180,17 @@ export default ProfileDet = () => {
             <Button
               title="זמינות חניה"
               color="black"
-              onPress={() =>{ userDet.isConfirm ? 
-                navigation.navigate("EditParkingDetails", {
-                  title: "",
-                }) : Alert.alert("החניה בהמתנה לאישור המנהלים" , "אנא נסו שוב מאוחר יותר")}
-              }
+              onPress={() => {
+                userDet.isConfirm
+                  ? navigation.navigate("EditParkingDetails", {
+                      title: "",
+                      userCurrentToken: currentUuidTkn[0].userToken,
+                    })
+                  : Alert.alert(
+                      "החניה בהמתנה לאישור המנהלים",
+                      "אנא נסו שוב מאוחר יותר"
+                    );
+              }}
               testID="editParkBtn"
             />
           </Pressable>
@@ -103,6 +201,10 @@ export default ProfileDet = () => {
               onPress={() =>
                 navigation.navigate("EditProfileD", {
                   title: "",
+                  userCurrentToken:
+                    currentUuidTkn && currentUuidTkn[0]
+                      ? currentUuidTkn[0].userToken
+                      : null,
                 })
               }
             />
@@ -140,7 +242,11 @@ export default ProfileDet = () => {
     }
   };
 
-  const parkingNotAllow = <Text style={{fontSize:14, color:'#bfbfbf'}}>חניה לא זמינה כרגע , ממתינה לאישור המנהלים</Text>
+  const parkingNotAllow = (
+    <Text style={{ fontSize: 14, color: "#bfbfbf" }}>
+      חניה לא זמינה כרגע , ממתינה לאישור המנהלים
+    </Text>
+  );
 
   return (
     <View style={styles.container}>

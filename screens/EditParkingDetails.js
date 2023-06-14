@@ -25,7 +25,7 @@ import { AuthContext } from "../store/contextAuth";
 
 import { Ionicons } from "@expo/vector-icons";
 
-const EditParkingDetails = () => {
+const EditParkingDetails = ({route}) => {
   const [selected, setSelected] = useState(new Date());
   const [fromTime, setFromTime] = useState(new Date());
   const [untilTime, setUntilTime] = useState(new Date());
@@ -34,13 +34,16 @@ const EditParkingDetails = () => {
   const [availableDays, setAvailableDays] = useState([]);
   const [sortedArray, setSortedArray] = useState([]);
 
+  const { userCurrentToken } = route.params;
+
+
   useEffect(() => {
     // Fetch the current available days from the database and update the state
     const fetchAvailableDays = async () => {
       try {
         const availableDb = collection(db, "availableDates");
 
-        const q = query(availableDb, where("matchOwnerId", "==", token)); // Filter by matchOwnerId
+        const q = query(availableDb, where("matchOwnerId", "==", userCurrentToken)); // Filter by matchOwnerId
         const querySnapshot = await getDocs(q);
         const availableDaysData = querySnapshot.docs.map((doc) => doc.data());
 
@@ -120,7 +123,7 @@ const EditParkingDetails = () => {
           untilTime: untilTime.toLocaleTimeString(),
           whichDay: selected.toLocaleDateString(),
         },
-        matchOwnerId: token,
+        matchOwnerId: userCurrentToken,
         id: new Date().toString() + Math.random().toString(),
         isBusy: false,
         rentBy: "",

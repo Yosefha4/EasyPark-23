@@ -5,9 +5,11 @@ import AuthContent from "../components/Auth/AuthContent";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { AuthContext } from "../store/contextAuth";
 import { login } from "../utils/auth";
+import EmailContext from "../store/emailContext";
 
 function LoginScreen() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const emailContext = useContext(EmailContext);
 
   const authCtx = useContext(AuthContext);
 
@@ -15,7 +17,11 @@ function LoginScreen() {
     setIsAuthenticating(true);
     try {
       const token = await login(email, password);
-      console.log(email)
+
+      emailContext.setEmail(email); // Set the email value in the context
+      // emailContext.setEmail(email);
+      
+      // console.log(email)
       authCtx.authenticate(token);
       console.log("Auth Success!")
     } catch (error) {
