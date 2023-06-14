@@ -21,11 +21,9 @@ import EditProfileDetails from "./screens/EditProfileDetails";
 import PaypalPayScreen from "./screens/PaypalPayScreen";
 import ManageParking from "./screens/ManageParking";
 import { Image } from "react-native";
-import { EmailProvider } from './store/emailContext';
+import { EmailProvider } from "./store/emailContext";
 
 const Stack = createNativeStackNavigator();
-
-
 
 function AuthStack() {
   return (
@@ -168,7 +166,7 @@ export default function App() {
       <StatusBar style="dark" />
       <AuthContextProvider>
         <EmailProvider>
-        <Root />
+          <Root />
         </EmailProvider>
       </AuthContextProvider>
     </>
