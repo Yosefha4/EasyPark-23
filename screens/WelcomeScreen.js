@@ -61,7 +61,8 @@ function WelcomeScreen() {
         const availableDaysData = querySnapshot.docs.map((doc) => doc.data());
     
         setUserUidToken(availableDaysData);
-        console.log("The user UID is:", availableDaysData[0]?.userToken);
+        console.log(availableDaysData)
+        // console.log("The user UID is:", availableDaysData[0]?.userToken);
         // console.log(userUidToken[0].userToken);
         console.log("The user EMAIL is:", email);
       } catch (error) {
@@ -136,29 +137,35 @@ function WelcomeScreen() {
   // }
 
   async function saveNotificationToken() {
-    try {
-      const notifications = collection(db, "pushNotif");
-
-      const querySnapshot = await getDocs(
-        query(notifications, where("userIDToken", "==", userUidToken[0].userToken))
-      );
-
-      if (querySnapshot.empty) {
-        const userIDToken = userUidToken && userUidToken[0]?.userToken;
-        const pushToken = currentPushToken || "Undefined pushToken";
-        // await configurePushNoti();
-        await addDoc(notifications, {
-          userIDToken: userIDToken || "Undefined userIDToken",
-          pushToken: pushToken,
-        });
-        Alert.alert("ה-Push Token נשמר בהצלחה !");
-      } else {
-        console.log("The token already exist ...");
+    console.log("userUIDToken : " , userUidToken)
+    if(userUidToken.length > 1){
+      try {
+        const notifications = collection(db, "pushNotif");
+  
+  
+        const querySnapshot = await getDocs(
+          query(notifications, where("userIDToken", "==", userUidToken[0].userToken))
+        );
+  
+        if (querySnapshot.empty) {
+          const userIDToken = userUidToken && userUidToken[0]?.userToken;
+          const pushToken = currentPushToken || "Undefined pushToken";
+          // await configurePushNoti();
+          await addDoc(notifications, {
+            userIDToken: userIDToken || "Undefined userIDToken",
+            pushToken: pushToken,
+          });
+          Alert.alert("ה-Push Token נשמר בהצלחה !");
+        } else {
+          console.log("The token already exist ...");
+        }
+      } catch (error) {
+        console.log(error);
+        Alert.alert("משהו השתבש...", "WELCOMESCREEN אנא נסה שוב מאוחר יותר או צור איתנו קשר ");
       }
-    } catch (error) {
-      console.log(error);
-      Alert.alert("משהו השתבש...", "WELCOMESCREEN אנא נסה שוב מאוחר יותר או צור איתנו קשר ");
     }
+
+   
   }
 
   // console.log("TOKEN : ", token);

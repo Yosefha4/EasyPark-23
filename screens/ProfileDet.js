@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { Colors } from "../constants/styles";
-import { AuthContext } from "../store/contextAuth";
+// import { AuthContext } from "../store/contextAuth";
 import {
   collection,
   getDocs,
@@ -26,11 +26,13 @@ import { async } from "@firebase/util";
 export default ProfileDet = () => {
   const navigation = useNavigation();
 
-  const { token, isAuthenticated } = useContext(AuthContext);
+  // const { token, isAuthenticated } = useContext(AuthContext);
 
   //Get email from Context API
   const emailContext = useContext(EmailContext);
   const email = emailContext.email;
+
+  console.log(email , "wami; email")
 
   const [currentUuidTkn, setCurrentUuidTkn] = useState(null);
 
@@ -55,6 +57,9 @@ export default ProfileDet = () => {
         const q = query(matchUuidToken, where("userEmail", "==", email)); // Filter by matchOwnerId
         const querySnapshot = await getDocs(q);
         const availableDaysData = querySnapshot.docs.map((doc) => doc.data());
+
+        console.log('availableDaysData:', availableDaysData);
+
 
         setCurrentUuidTkn(availableDaysData);
         updateFlag();
@@ -110,9 +115,9 @@ export default ProfileDet = () => {
   }, []);
 
   useEffect(() => {
-    if (currentDetails && currentUuidTkn) {
+    if (currentDetails.length > 1 && currentUuidTkn) {
       currentDetails.forEach((item) => {
-        if (item.parkingID === currentUuidTkn[0].userToken) {
+        if (item.parkingID === currentUuidTkn[0]?.userToken) {
           setUserDet(item);
         }
       });
@@ -132,12 +137,12 @@ export default ProfileDet = () => {
   async function updateFlag() {
     // isUserParkingOwner = false;
     // console.log("currentUuidTkn               ", currentUuidTkn);
-    if (currentUuidTkn && currentUuidTkn.length > 0) {
+    if (currentUuidTkn && currentUuidTkn.length > 1) {
       currentDetails.forEach((detail) => {
         // console.log(tempCount);
         // console.log(currentUuidTkn[0].userToken);
         // console.log(detail.parkingID);
-        if (detail.parkingID === currentUuidTkn[0].userToken) {
+        if (detail.parkingID === currentUuidTkn[0]?.userToken) {
           // isUserParkingOwner = true;
           setTempCount(true);
           // console.log("match");
@@ -157,6 +162,19 @@ export default ProfileDet = () => {
   // console.log(isUserParkingOwner);
 
   // console.log(currentUuidTkn[0].userToken === currentDetails[0].parkingID)
+
+  let userCurrentToken;
+
+  if (
+    currentUuidTkn &&
+    currentUuidTkn.length > 1 &&
+    currentUuidTkn[0].hasOwnProperty("userToken")
+  ) {
+    userCurrentToken = currentUuidTkn[0]?.userToken;
+  } else {
+    // Handle the case when 'currentUuidTkn' is undefined or does not have 'userToken' property
+    userCurrentToken = null; // Assign a default value or handle the error accordingly
+  }
 
   const renderButtons = () => {
     // console.log("The ISUOWNERpARKING : ", tempCount);
@@ -184,7 +202,7 @@ export default ProfileDet = () => {
                 userDet.isConfirm
                   ? navigation.navigate("EditParkingDetails", {
                       title: "",
-                      userCurrentToken: currentUuidTkn[0].userToken,
+                      userCurrentToken: userCurrentToken,
                     })
                   : Alert.alert(
                       "החניה בהמתנה לאישור המנהלים",
@@ -201,10 +219,7 @@ export default ProfileDet = () => {
               onPress={() =>
                 navigation.navigate("EditProfileD", {
                   title: "",
-                  userCurrentToken:
-                    currentUuidTkn && currentUuidTkn[0]
-                      ? currentUuidTkn[0].userToken
-                      : null,
+                  userCurrentToken: userCurrentToken,
                 })
               }
             />
