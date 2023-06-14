@@ -24,7 +24,7 @@ import {
 } from "@firebase/firestore";
 import { db } from "../config/firebase";
 
-const EditProfileDetails = () => {
+const EditProfileDetails = ({ route }) => {
   const [editPriceModalVisible, setEditPriceModalVisible] = useState(false);
   const [newPrice, setNewPrice] = useState("");
   const [editImageModalVisible, setEditImageModalVisible] = useState(false);
@@ -34,7 +34,9 @@ const EditProfileDetails = () => {
 
   const navigation = useNavigation();
 
-  const { token, isAuthenticated } = useContext(AuthContext);
+  // const { token, isAuthenticated } = useContext(AuthContext);
+
+  const thisTokenID = route.params.userCurrentToken;
 
   useEffect(() => {
     // Fetch the current available days from the database and update the state
@@ -42,7 +44,7 @@ const EditProfileDetails = () => {
       try {
         const currentParking = collection(db, "parkings");
 
-        const q = query(currentParking, where("parkingID", "==", token)); // Filter by matchOwnerId
+        const q = query(currentParking, where("parkingID", "==", thisTokenID)); // Filter by matchOwnerId
         const querySnapshot = await getDocs(q);
         const availableDaysData = querySnapshot.docs.map((doc) => doc.data());
 
@@ -58,6 +60,8 @@ const EditProfileDetails = () => {
 
     fetchCurrentParking();
   }, []);
+
+  console.log(thisTokenID);
 
   // useEffect(() => {
   //   console.log("The current parking det: ");
@@ -182,7 +186,15 @@ const EditProfileDetails = () => {
             <TouchableOpacity onPress={handleEditPrice} style={styles.btn}>
               <Text style={{ fontWeight: "bold" }}>עריכת מחיר</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=> Alert.alert("עריכת תמונה לא אפשרית כרגע" ,"פונקציה זו תתאפשר בהקדם")} style={styles.btn}>
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert(
+                  "עריכת תמונה לא אפשרית כרגע",
+                  "פונקציה זו תתאפשר בהקדם"
+                )
+              }
+              style={styles.btn}
+            >
               <Text style={{ fontWeight: "bold" }}>עריכת תמונה</Text>
             </TouchableOpacity>
           </View>

@@ -229,8 +229,8 @@ const ClockTimerCount = ({ parking }) => {
     });
   }
 
-  console.log(CurrentElement);
-  console.log(CurrentPush);
+  // console.log(CurrentElement);
+  // console.log(CurrentPush);
 
   return (
     <View style={styles.container}>

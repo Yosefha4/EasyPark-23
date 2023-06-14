@@ -8,6 +8,7 @@ import { Alert } from "react-native";
 import { addDoc, collection, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { AuthContext } from "../../store/contextAuth";
+import EmailContext from "../../store/emailContext";
 
 const ParkingForm = () => {
   const [pickedImage, setPickedImage] = useState();
@@ -18,16 +19,19 @@ const ParkingForm = () => {
   const [enterDescription, setEnterDescription] = useState("");
   const [enterOwnerId, setEnterOwnerId] = useState("");
   const [enterOwnerName, setEnterOwnerName] = useState("");
-  const [enterEmail, setEnterEmail] = useState("");
+  // const [enterEmail, setEnterEmail] = useState("");
   const [userTokenEn, setUserTokemEn] = useState("");
   const [tempCount, setTempCount] = useState(0);
 
-  const { token, isAuthenticated } = useContext(AuthContext);
+  // const { token, isAuthenticated } = useContext(AuthContext);
+
+  const emailContext = useContext(EmailContext);
+  const email = emailContext.email;
 
   useEffect(()=>{
-    funcToReturnID(enterEmail);
     takeLocationHandler();
-  },[enterEmail,tempCount,pickedLocation])
+    funcToReturnID();
+  },[,tempCount,pickedLocation])
 
   const updateStateRepeatedly = (times) => {
     let counter = 0;
@@ -53,11 +57,12 @@ const ParkingForm = () => {
         address: enterAddress,
         description: enterDescription,
         imageUri: pickedImage,
-        location: { lat: pickedLocation.lat, lng: pickedLocation.lng },
+        location: pickedLocation ? { lat: pickedLocation.lat, lng: pickedLocation.lng } : null,
+        // location: { lat: pickedLocation.lat, lng: pickedLocation.lng },
       
         ownerParkingId: enterOwnerId,
         ownerName: enterOwnerName,
-        ownerEmail:enterEmail,
+        ownerEmail:email,
         parkingID:  (userTokenEn ? userTokenEn : "errorParkingID"),
         // parkingID:  (enterEmail),
         // parkingID: token,
@@ -71,17 +76,19 @@ const ParkingForm = () => {
     }
   }
 
-  async function funcToReturnID(enteredEmail) {
+  
+
+  async function funcToReturnID() {
     try {
       const usersCollection = collection(db, 'users');
-      const queryRef = query(usersCollection, where('userEmail', '==', enteredEmail));
+      const queryRef = query(usersCollection, where('userEmail', '==', email));
       const querySnapshot = await getDocs(queryRef);
   
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
         const userId = userData.userToken; // Assuming the property is named 'id'
         setUserTokemEn(userId)
-        console.log("userID:" , userTokenEn)
+        // console.log("userID:" , userTokenEn)
         return userId;
       }
     } catch (error) {
@@ -109,9 +116,9 @@ const ParkingForm = () => {
   function takeImageHandler(imageUri) {
     setPickedImage(imageUri);
   }
-  function takeEmailHandler(enterText) {
-    setEnterEmail(enterText);
-  }
+  // function takeEmailHandler(enterText) {
+  //   setEnterEmail(enterText);
+  // }
 
   const takeLocationHandler = useCallback((location) => {
     setPicketLocation(location);
@@ -144,14 +151,14 @@ const ParkingForm = () => {
           value={enterOwnerName}
         />
       </View>
-      <View>
+      {/* <View>
         <Text style={styles.label}>אימייל (תואם לבעל החשבון)</Text>
         <TextInput
           style={styles.input}
           onChangeText={takeEmailHandler}
           value={enterEmail}
         />
-      </View>
+      </View> */}
       <View>
         <Text style={styles.label}>מחיר (לפי שעה)</Text>
         <TextInput
