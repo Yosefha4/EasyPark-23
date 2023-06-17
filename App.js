@@ -22,6 +22,8 @@ import PaypalPayScreen from "./screens/PaypalPayScreen";
 import ManageParking from "./screens/ManageParking";
 import { Image } from "react-native";
 import { EmailProvider } from "./store/emailContext";
+import CheckOut from "./components/CheckOut";
+import { StripeProvider } from "@stripe/stripe-react-native";
 
 const Stack = createNativeStackNavigator();
 
@@ -117,6 +119,7 @@ function AuthenticatedStack() {
         options={{ title: "" }}
       />
       <Stack.Screen name="Paypal" component={PaypalPayScreen} />
+      <Stack.Screen name="checkOut" component={CheckOut} />
       <Stack.Screen
         name="ManageP"
         component={ManageParking}
@@ -166,7 +169,10 @@ export default function App() {
       <StatusBar style="dark" />
       <AuthContextProvider>
         <EmailProvider>
+        <StripeProvider publishableKey="pk_test_51LfijuCY7aYWRarzyOMY22o9B0J5U5eacjAuUPGtp7psgqimnhppBiD6UU2axvJ5gH5fdfNFgATLdlGenz4TeQLl002rr1a3ST">
+
           <Root />
+          </StripeProvider>
         </EmailProvider>
       </AuthContextProvider>
     </>

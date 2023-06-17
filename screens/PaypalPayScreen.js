@@ -14,7 +14,6 @@ import moment from "moment";
 import { db } from "../config/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { AuthContext } from "../store/contextAuth";
-import {sendPushNotificationHandler} from '../components/parkings/ClockTimerCount'
 
 
 const PaypalPayScreen = ({ route }) => {
