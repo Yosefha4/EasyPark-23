@@ -36,14 +36,14 @@ const EditProfileDetails = ({ route }) => {
 
   // const { token, isAuthenticated } = useContext(AuthContext);
 
-  const thisTokenID = route.params.userCurrentToken;
+  const thisTokenID = route.params?.currentUuidTkn[0]?.userToken;
 
   useEffect(() => {
     // Fetch the current available days from the database and update the state
     const fetchCurrentParking = async () => {
       try {
         const currentParking = collection(db, "parkings");
-
+// console.log(CurrentParkingDet)
         const q = query(currentParking, where("parkingID", "==", thisTokenID)); // Filter by matchOwnerId
         const querySnapshot = await getDocs(q);
         const availableDaysData = querySnapshot.docs.map((doc) => doc.data());
@@ -61,7 +61,7 @@ const EditProfileDetails = ({ route }) => {
     fetchCurrentParking();
   }, []);
 
-  console.log(thisTokenID);
+  console.log(thisTokenID, "TokenID");
 
   // useEffect(() => {
   //   console.log("The current parking det: ");

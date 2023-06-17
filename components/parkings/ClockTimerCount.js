@@ -87,7 +87,9 @@ const ClockTimerCount = ({ parking }) => {
       return;
     }
   });
-
+  
+  console.log(isMatchId)
+  console.log(rentDays)
   // rentDays.map((item) => {
   //   if (item.matchOwnerId === parking.parkingID) {
   //     matchArrayList.push(item);

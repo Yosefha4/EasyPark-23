@@ -67,6 +67,7 @@ export default ProfileDet = () => {
         console.log("error, error", error);
       }
     };
+    updateFlag();
 
     fetchAvailableDays();
   }, [currentDetails, counterNumber]);
@@ -119,6 +120,7 @@ export default ProfileDet = () => {
       currentDetails.forEach((item) => {
         if (item.parkingID === currentUuidTkn[0]?.userToken) {
           setUserDet(item);
+          setTempCount(true)
         }
       });
     }
@@ -134,16 +136,21 @@ export default ProfileDet = () => {
   //     : false;
   // }
 
+  console.log(currentUuidTkn,"currentUuidTkn")
+  // console.log(currentDetails,"currentDetails")
+
   async function updateFlag() {
     // isUserParkingOwner = false;
     // console.log("currentUuidTkn               ", currentUuidTkn);
     if (currentUuidTkn && currentUuidTkn.length > 1) {
       currentDetails.forEach((detail) => {
+        console.log(detail)
         // console.log(tempCount);
         // console.log(currentUuidTkn[0].userToken);
         // console.log(detail.parkingID);
         if (detail.parkingID === currentUuidTkn[0]?.userToken) {
           // isUserParkingOwner = true;
+          console.log("ttttttttttttttttttttttt")
           setTempCount(true);
           // console.log("match");
           return;
@@ -175,7 +182,7 @@ export default ProfileDet = () => {
     // Handle the case when 'currentUuidTkn' is undefined or does not have 'userToken' property
     userCurrentToken = null; // Assign a default value or handle the error accordingly
   }
-
+console.log(tempCount,"tempCount")
   const renderButtons = () => {
     // console.log("The ISUOWNERpARKING : ", tempCount);
     if (tempCount) {
@@ -217,10 +224,11 @@ export default ProfileDet = () => {
               title=" פרטי חניה"
               color="black"
               onPress={() =>
-                navigation.navigate("EditProfileD", {
+                {navigation.navigate("EditProfileD", {
                   title: "",
-                  userCurrentToken: userCurrentToken,
+                  currentUuidTkn,
                 })
+              console.log(currentUuidTkn,"currentUuidTkn")}
               }
             />
           </Pressable>
@@ -239,7 +247,8 @@ export default ProfileDet = () => {
             <Button
               title="צור קשר"
               color="black"
-              onPress={() => console.log("try")}
+              onPress={() => navigation.navigate("checkOut")}
+              // onPress={() => console.log("try")}
             />
           </Pressable>
         </>
@@ -250,6 +259,7 @@ export default ProfileDet = () => {
           <Button
             title="בקשה לפרסום חניה"
             color="black"
+            // onPress={() => navigation.navigate("checkOut")}
             onPress={() => navigation.navigate("AddParking")}
           />
         </Pressable>
